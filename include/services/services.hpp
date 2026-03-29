@@ -1,5 +1,5 @@
 #pragma once
-#include "../util/singleton.hpp"
+#include "../utils/singleton.hpp"
 #include "logger.hpp"
 
 namespace Engine

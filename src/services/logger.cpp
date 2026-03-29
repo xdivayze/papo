@@ -2,6 +2,7 @@
 #include <chrono>
 #include <format>
 #include <stdexcept>
+#include "utils/exception.hpp"
 
 static constexpr const char *DEFAULT_LOG_FILE = "engine.log";
 static constexpr const char *TAG = "LOGGER";
@@ -27,7 +28,7 @@ namespace Services
         file_ = std::fopen(DEFAULT_LOG_FILE, "a");
         if (!file_)
         {
-            throw std::runtime_error(std::string("Logger: failed to open file: ") + DEFAULT_LOG_FILE);
+            throw Util::PapoException(TAG,std::string("failed to open file: ") + DEFAULT_LOG_FILE );
         }
         minLevel_ = LogLevel::Info;
     }

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstddef>
 namespace Services
 {
     class StackAllocater
@@ -15,7 +16,8 @@ namespace Services
     private:
         explicit StackAllocater(std::uint32_t stackSize_bytes);
         ~StackAllocater();
-        void *block_;
+        std::uint32_t stackSize_bytes_;
+        std::byte *stack_;
         Marker marker_;
     };
 }
