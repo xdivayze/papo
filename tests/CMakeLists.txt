@@ -11,3 +11,4 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 add_subdirectory(services)
+add_subdirectory(utils)
