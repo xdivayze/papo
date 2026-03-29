@@ -7,12 +7,12 @@ namespace Engine
     class Root : public Singleton<Root>
     {
     public:
-        Logger logger;
+        Services::Logger* logger;
 
         friend class Singleton<Root>;
 
     private:
-        Root() = default;
-        ~Root() = default;
+        Root();
+        ~Root();
     };
 }

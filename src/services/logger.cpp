@@ -19,7 +19,7 @@ static constexpr const char *levelToString(LogLevel level)
     }
 }
 
-namespace Engine
+namespace Services
 {
     Logger::Logger()
     {

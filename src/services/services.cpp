@@ -2,5 +2,13 @@
 
 namespace Engine
 {
-    
+    Root::Root()
+    {
+        logger = new Services::Logger();
+    }
+
+    Root::~Root()
+    {
+        delete logger;
+    }
 }

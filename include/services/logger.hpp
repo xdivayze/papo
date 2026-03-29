@@ -9,10 +9,10 @@ enum class LogLevel
     Error
 };
 
-namespace Engine
-{
-    class Root;
+namespace Engine { class Root; }
 
+namespace Services
+{
     class Logger
     {
     public:
@@ -24,7 +24,7 @@ namespace Engine
         int setOutputFile(const std::string &filepath);
         void setLogLevel(LogLevel minLevel);
 
-        friend class Root;
+        friend class Engine::Root;
 
     private:
         Logger();
