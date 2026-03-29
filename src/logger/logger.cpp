@@ -95,6 +95,7 @@ namespace Engine
 
         std::string formattedString;
         formattedString = std::format("[{:%H:%M:%S}] [{}] [{}] {}\n", std::chrono::zoned_time{std::chrono::current_zone(), std::chrono::system_clock::now()}, levelToString(level), tag, msg);
-        std::fwrite(msg.data(), sizeof(char), msg.size(), file_);
+        std::fwrite(formattedString.data(), sizeof(char), formattedString.size(), file_);
+        std::fflush(file_);
     }
 }
