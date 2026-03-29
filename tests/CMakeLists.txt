@@ -10,4 +10,4 @@ FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
 
-add_subdirectory(logger)
+add_subdirectory(services)
