@@ -84,8 +84,8 @@ protected:
     void SetUp() override
     {
         fs::remove(testLogFile);
-        Engine::Root::get().logger->setOutputFile(testLogFile);
-        Engine::Root::get().logger->setLogLevel(LogLevel::Error);
+        Engine::Root::get().logger_->setOutputFile(testLogFile);
+        Engine::Root::get().logger_->setLogLevel(LogLevel::Error);
     }
 
     void TearDown() override
@@ -103,7 +103,7 @@ protected:
 TEST_F(ExceptionHandlerTest, LogsPapoExceptionWithItsOwnTag)
 {
     Util::PapoException e("MY_TAG", "my message");
-    Util::handleException(Engine::Root::get().logger, e);
+    Util::handleException(Engine::Root::get().logger_, e);
 
     std::string log = readLogFile();
     EXPECT_NE(log.find("MY_TAG"), std::string::npos);
@@ -113,7 +113,7 @@ TEST_F(ExceptionHandlerTest, LogsPapoExceptionWithItsOwnTag)
 TEST_F(ExceptionHandlerTest, LogsMemoryExceptionWithItsOwnTag)
 {
     Util::MemoryException e("MEM", "out of bounds");
-    Util::handleException(Engine::Root::get().logger, e);
+    Util::handleException(Engine::Root::get().logger_, e);
 
     std::string log = readLogFile();
     EXPECT_NE(log.find("MEM"), std::string::npos);
@@ -123,7 +123,7 @@ TEST_F(ExceptionHandlerTest, LogsMemoryExceptionWithItsOwnTag)
 TEST_F(ExceptionHandlerTest, LogsStdExceptionWithHandlerTag)
 {
     std::runtime_error e("something failed");
-    Util::handleException(Engine::Root::get().logger, e);
+    Util::handleException(Engine::Root::get().logger_, e);
 
     std::string log = readLogFile();
     EXPECT_NE(log.find("EXCEPTION HANDLER"), std::string::npos);
@@ -133,7 +133,7 @@ TEST_F(ExceptionHandlerTest, LogsStdExceptionWithHandlerTag)
 TEST_F(ExceptionHandlerTest, PapoExceptionDoesNotUseHandlerTag)
 {
     Util::PapoException e("MY_TAG", "msg");
-    Util::handleException(Engine::Root::get().logger, e);
+    Util::handleException(Engine::Root::get().logger_, e);
 
     std::string log = readLogFile();
     EXPECT_EQ(log.find("EXCEPTION HANDLER"), std::string::npos);
@@ -142,6 +142,6 @@ TEST_F(ExceptionHandlerTest, PapoExceptionDoesNotUseHandlerTag)
 TEST(ExceptionHandlerInstallTest, InstallTerminateHandlerSetsTerminate)
 {
     auto before = std::get_terminate();
-    Util::installTerminateHandler(Engine::Root::get().logger);
+    Util::installTerminateHandler(Engine::Root::get().logger_);
     EXPECT_NE(std::get_terminate(), before);
 }

@@ -53,6 +53,5 @@ namespace Services
     StackAllocater::~StackAllocater()
     {
         free(stack_);
-        marker_ = 0;
     }
 }

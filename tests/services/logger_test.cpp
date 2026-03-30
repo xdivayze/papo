@@ -13,8 +13,8 @@ protected:
     void SetUp() override
     {
         fs::remove(testLogFile);
-        Engine::Root::get().logger->setOutputFile(testLogFile);
-        Engine::Root::get().logger->setLogLevel(LogLevel::Info);
+        Engine::Root::get().logger_->setOutputFile(testLogFile);
+        Engine::Root::get().logger_->setLogLevel(LogLevel::Info);
     }
 
     void TearDown() override
@@ -31,18 +31,18 @@ protected:
 
 TEST_F(LoggerTest, SetOutputFileSucceeds)
 {
-    EXPECT_EQ(Engine::Root::get().logger->setOutputFile(testLogFile), 0);
+    EXPECT_EQ(Engine::Root::get().logger_->setOutputFile(testLogFile), 0);
 }
 
 TEST_F(LoggerTest, SetOutputFileFailsOnInvalidPath)
 {
-    EXPECT_EQ(Engine::Root::get().logger->setOutputFile("/nonexistent/dir/test.log"), -1);
+    EXPECT_EQ(Engine::Root::get().logger_->setOutputFile("/nonexistent/dir/test.log"), -1);
 }
 
 TEST_F(LoggerTest, LogLevelFiltersMessages)
 {
-    Engine::Root::get().logger->setLogLevel(LogLevel::Error);
-    Engine::Root::get().logger->info("TEST", "should be filtered");
+    Engine::Root::get().logger_->setLogLevel(LogLevel::Error);
+    Engine::Root::get().logger_->info("TEST", "should be filtered");
 
     std::string content = readLogFile();
     EXPECT_TRUE(content.empty());
@@ -50,9 +50,9 @@ TEST_F(LoggerTest, LogLevelFiltersMessages)
 
 TEST_F(LoggerTest, LogLevelAllowsMessagesAtOrAboveMinLevel)
 {
-    Engine::Root::get().logger->setLogLevel(LogLevel::Warning);
-    Engine::Root::get().logger->warn("TEST", "visible warning");
-    Engine::Root::get().logger->error("TEST", "visible error");
+    Engine::Root::get().logger_->setLogLevel(LogLevel::Warning);
+    Engine::Root::get().logger_->warn("TEST", "visible warning");
+    Engine::Root::get().logger_->error("TEST", "visible error");
 
     std::string content = readLogFile();
     EXPECT_FALSE(content.empty());
@@ -60,8 +60,8 @@ TEST_F(LoggerTest, LogLevelAllowsMessagesAtOrAboveMinLevel)
 
 TEST_F(LoggerTest, InfoMessageIsWritten)
 {
-    Engine::Root::get().logger->setLogLevel(LogLevel::Info);
-    Engine::Root::get().logger->info("TEST", "hello info");
+    Engine::Root::get().logger_->setLogLevel(LogLevel::Info);
+    Engine::Root::get().logger_->info("TEST", "hello info");
 
     std::string content = readLogFile();
     EXPECT_FALSE(content.empty());
@@ -69,5 +69,5 @@ TEST_F(LoggerTest, InfoMessageIsWritten)
 
 TEST_F(LoggerTest, GetReturnsSameInstance)
 {
-    EXPECT_EQ(&Engine::Root::get().logger, &Engine::Root::get().logger);
+    EXPECT_EQ(&Engine::Root::get().logger_, &Engine::Root::get().logger_);
 }
