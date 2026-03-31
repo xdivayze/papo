@@ -6,7 +6,7 @@
 #include <memory>
 #include <cassert>
 #include "../../utils/exception.hpp"
-
+#include "../../collections/robin_hood.hpp"
 constexpr const char *TAG = "Pool Manager";
 
 namespace Memory
@@ -92,7 +92,7 @@ namespace Memory
             return *foundPool->second;
         }
 
-        std::unordered_map<std::type_index, std::unique_ptr<IPool>> pools_;
+        robin_hood::unordered_flat_map<std::type_index, std::unique_ptr<IPool>> pools_; 
     };
 
 }
