@@ -2,8 +2,12 @@
 #include "../../utils/singleton.hpp"
 #include <cstdint>
 #include "stack_allocater.hpp"
+#include <cstddef>
 class MemoryManagerTest;
-namespace Engine { class Root; }
+namespace Engine
+{
+    class Root;
+}
 namespace Services
 {
     class MemoryManager
@@ -16,12 +20,14 @@ namespace Services
 
         friend class Engine::Root;
         friend class ::MemoryManagerTest;
-        void *allocateStack(std::uint32_t size_bytes);
+
+        void *allocateStack(std::uint32_t size_bytes, size_t alignment = alignof(std::max_align_t));
         void freeStackToMarker(StackAllocater::Marker marker);
         void freeStack();
 
     private:
         StackAllocater *stackAllocater_;
+
         explicit MemoryManager(MemoryManagerContext *ctx);
         ~MemoryManager();
     };

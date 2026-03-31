@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <memory>
 #include <malloc.h>
+#include "../../utils/memory_utils.hpp"
 namespace Memory
 {
     class IPool
@@ -25,15 +26,18 @@ namespace Memory
         static constexpr size_t chunkSize_ = align_up(max(sizeof(T), sizeof(void *)), alignof(T));
 
         std::byte *memoryBlock_;
-        FreeNode *freeHead;
-        size_t poolCapacity;
+        FreeNode *freeHead_;
+        size_t poolCapacity_;
+        void *rawBlock_;
 
     public:
-        PoolAllocater(size_t capacity) : poolCapacity(capacity)
+        PoolAllocater(size_t capacity) : poolCapacity_(capacity)
         {
-            memoryBlock_ = static_cast<std::byte *>(malloc(capacity * chunkSize_));
-            freeHead = static_cast<FreeNode *>(memoryBlock_);
-            FreeNode *curr = freeHead;
+            rawBlock_ = malloc(capacity * chunkSize_ + alignof(T) - 1);
+            memoryBlock_ = Util::AlignPointer<std::byte>(static_cast<std::byte *>(rawBlock_), alignof(T));
+
+            freeHead_ = static_cast<FreeNode *>(memoryBlock_);
+            FreeNode *curr = freeHead_;
             for (int i = 0; i < capacity; i++)
             {
                 curr->next = reinterpret_cast<FreeNode *>(
@@ -45,28 +49,28 @@ namespace Memory
 
         ~PoolAllocater() override
         {
-            delete memoryBlock_;
+            ::free(rawBlock_);
         }
 
         void *alloc() override
         {
-            if (freeHead == nullptr)
+            if (freeHead_ == nullptr)
                 return nullptr;
-            FreeNode *chunk = freeHead;
-            freeHead = chunk->next;
+            FreeNode *chunk = freeHead_;
+            freeHead_ = chunk->next;
             return static_cast<void *>(chunk);
         }
 
         void free(void *ptr) override
         {
             FreeNode *chunk = static_cast<FreeNode *>(ptr);
-            chunk->next = freeHead;
-            freeHead = chunk;
+            chunk->next = freeHead_;
+            freeHead_ = chunk;
         }
 
         size_t capacity() const override
         {
-            return poolCapacity;
+            return poolCapacity_;
         }
     };
 }
