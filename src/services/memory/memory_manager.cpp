@@ -4,10 +4,10 @@ constexpr const std::uint32_t DEFAULT_STACK_LOCK_SIZE_BYTES = (1 << 10) << 10; /
 
 namespace Services
 {
-    
-    void *MemoryManager::allocateStack(std::uint32_t size_bytes)
+
+    void *MemoryManager::allocateStack(std::uint32_t size_bytes, size_t alignment)
     {
-        return stackAllocater_->alloc(size_bytes);
+        return stackAllocater_->allocAligned(size_bytes, alignment);
     }
 
     void MemoryManager::freeStack()
@@ -15,9 +15,19 @@ namespace Services
         return stackAllocater_->clear();
     }
 
-    void MemoryManager::freeStackToMarker(StackAllocater::Marker marker)
+    void MemoryManager::freeStackMemory(void *ptr)
     {
-        return stackAllocater_->freeToMarker(marker);
+        return stackAllocater_->freeAligned(ptr);
+    }
+
+    void *MemoryManager::allocateStackUnaligned(std::uint32_t size_bytes)
+    {
+        return stackAllocater_->alloc(size_bytes);
+    }
+
+    void MemoryManager::freeStackMemoryUnaligned(void *ptr)
+    {
+        return stackAllocater_->freeUnaligned(ptr);
     }
 
     MemoryManager::MemoryManager(MemoryManagerContext *ctx)

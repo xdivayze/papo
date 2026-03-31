@@ -5,7 +5,7 @@
 class MemoryManagerTest : public ::testing::Test
 {
 protected:
-    static constexpr std::uint32_t STACK_SIZE = 128;
+    static constexpr std::uint32_t STACK_SIZE = 256;
     Services::MemoryManager *mgr_;
 
     void SetUp() override
@@ -19,10 +19,21 @@ protected:
         delete mgr_;
     }
 
-    void *doAllocateStack(std::uint32_t size_bytes) { return mgr_->allocateStack(size_bytes); }
+    void *doAllocateStack(std::uint32_t size_bytes, size_t alignment = alignof(std::max_align_t))
+    {
+        return mgr_->allocateStack(size_bytes, alignment);
+    }
     void doFreeStack() { mgr_->freeStack(); }
-    void doFreeStackToMarker(Services::StackAllocater::Marker marker) { mgr_->freeStackToMarker(marker); }
+    void doFreeStackMemory(void *ptr) { mgr_->freeStackMemory(ptr); }
+
+    void *doAllocateStackUnaligned(std::uint32_t size_bytes)
+    {
+        return mgr_->allocateStackUnaligned(size_bytes);
+    }
+    void doFreeStackMemoryUnaligned(void *ptr) { mgr_->freeStackMemoryUnaligned(ptr); }
+
     Services::StackAllocater::Marker getMarker() { return mgr_->stackAllocater_->getMarker(); }
+
     void doRecreate(Services::MemoryManager::MemoryManagerContext *ctx)
     {
         delete mgr_;
@@ -30,34 +41,30 @@ protected:
     }
 };
 
+// --- aligned allocateStack ---
+
 TEST_F(MemoryManagerTest, AllocateStackReturnsNonNull)
 {
-    void *ptr = doAllocateStack(16);
-    EXPECT_NE(ptr, nullptr);
+    EXPECT_NE(doAllocateStack(16), nullptr);
 }
 
-TEST_F(MemoryManagerTest, AllocateStackAdvancesMarker)
+TEST_F(MemoryManagerTest, AllocateStackReturnsAlignedPointer)
 {
-    doAllocateStack(16);
-    EXPECT_EQ(getMarker(), 16u);
-}
-
-TEST_F(MemoryManagerTest, MultipleAllocatesAdvanceMarkerCumulatively)
-{
-    doAllocateStack(10);
-    doAllocateStack(20);
-    EXPECT_EQ(getMarker(), 30u);
+    constexpr size_t alignment = 16;
+    void *ptr = doAllocateStack(16, alignment);
+    EXPECT_EQ(reinterpret_cast<std::uintptr_t>(ptr) % alignment, 0u);
 }
 
 TEST_F(MemoryManagerTest, AllocateStackOverCapacityThrows)
 {
+    // size + alignment already exceeds STACK_SIZE
     EXPECT_THROW(doAllocateStack(STACK_SIZE), Util::MemoryException);
 }
 
 TEST_F(MemoryManagerTest, AllocateStackThatWouldExceedCapacityThrows)
 {
-    doAllocateStack(64);
-    EXPECT_THROW(doAllocateStack(65), Util::MemoryException);
+    doAllocateStack(100, 16);
+    EXPECT_THROW(doAllocateStack(141, 16), Util::MemoryException);
 }
 
 TEST_F(MemoryManagerTest, FreeStackResetsMarker)
@@ -69,33 +76,83 @@ TEST_F(MemoryManagerTest, FreeStackResetsMarker)
 
 TEST_F(MemoryManagerTest, AllocateAfterFreeStackSucceeds)
 {
-    doAllocateStack(64);
+    doAllocateStack(64, 16);
     doFreeStack();
-    EXPECT_NO_THROW(doAllocateStack(64));
+    EXPECT_NO_THROW(doAllocateStack(64, 16));
 }
 
-TEST_F(MemoryManagerTest, FreeStackToMarkerRestoresMarker)
+TEST_F(MemoryManagerTest, FreeStackMemoryRestoresMarkerAfterFirstAlloc)
 {
+    // Lay down a baseline with unaligned alloc so we can track the marker exactly.
+    doAllocateStackUnaligned(32);
+    Services::StackAllocater::Marker baseline = getMarker();
+
+    void *ptr = doAllocateStack(16, 16);
+    doAllocateStack(8, 8);
+
+    doFreeStackMemory(ptr);
+
+    EXPECT_EQ(getMarker(), baseline + 32u); // baseline + size+alignment of first aligned alloc
+}
+
+TEST_F(MemoryManagerTest, FreeStackMemoryNullIsNoOp)
+{
+    doAllocateStack(16);
     Services::StackAllocater::Marker before = getMarker();
-    doAllocateStack(32);
-    doFreeStackToMarker(before);
+    EXPECT_NO_THROW(doFreeStackMemory(nullptr));
     EXPECT_EQ(getMarker(), before);
 }
 
-TEST_F(MemoryManagerTest, FreeStackToCurrentMarkerIsNoOp)
+// --- unaligned allocateStackUnaligned ---
+
+TEST_F(MemoryManagerTest, AllocateStackUnalignedReturnsNonNull)
 {
-    doAllocateStack(32);
-    Services::StackAllocater::Marker current = getMarker();
-    doFreeStackToMarker(current);
-    EXPECT_EQ(getMarker(), current);
+    EXPECT_NE(doAllocateStackUnaligned(16), nullptr);
 }
 
-TEST_F(MemoryManagerTest, FreeStackToMarkerAheadOfCurrentThrows)
+TEST_F(MemoryManagerTest, AllocateStackUnalignedAdvancesMarkerExactly)
 {
-    doAllocateStack(16);
-    Services::StackAllocater::Marker ahead = getMarker() + 8;
-    EXPECT_THROW(doFreeStackToMarker(ahead), Util::MemoryException);
+    doAllocateStackUnaligned(16);
+    EXPECT_EQ(getMarker(), 16u);
 }
+
+TEST_F(MemoryManagerTest, MultipleUnalignedAllocatesAdvanceMarkerCumulatively)
+{
+    doAllocateStackUnaligned(10);
+    doAllocateStackUnaligned(20);
+    EXPECT_EQ(getMarker(), 30u);
+}
+
+TEST_F(MemoryManagerTest, AllocateStackUnalignedOverCapacityThrows)
+{
+    EXPECT_THROW(doAllocateStackUnaligned(STACK_SIZE), Util::MemoryException);
+}
+
+TEST_F(MemoryManagerTest, AllocateStackUnalignedThatWouldExceedCapacityThrows)
+{
+    doAllocateStackUnaligned(200);
+    EXPECT_THROW(doAllocateStackUnaligned(57), Util::MemoryException);
+}
+
+TEST_F(MemoryManagerTest, FreeStackMemoryUnalignedRestoresMarkerToPointerOffset)
+{
+    void *ptrA = doAllocateStackUnaligned(32);
+    doAllocateStackUnaligned(16);
+
+    doFreeStackMemoryUnaligned(ptrA);
+
+    EXPECT_EQ(getMarker(), 32u);
+}
+
+TEST_F(MemoryManagerTest, AllocateAfterFreeStackMemoryUnalignedSucceeds)
+{
+    void *ptr = doAllocateStackUnaligned(64);
+    doAllocateStackUnaligned(32);
+    doFreeStackMemoryUnaligned(ptr);
+    EXPECT_NO_THROW(doAllocateStackUnaligned(32));
+}
+
+// --- construction ---
 
 TEST_F(MemoryManagerTest, NullContextUsesDefaultStackSize)
 {

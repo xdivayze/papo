@@ -68,6 +68,11 @@ namespace Services
         return pAlignedMem;
     }
 
+    void StackAllocater::freeUnaligned(void *ptr)
+    {
+        freeToMarker(pointerToMarker(ptr));
+    }
+
     void StackAllocater::freeAligned(void *ptr)
     {
         if (!ptr)

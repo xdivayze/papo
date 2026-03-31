@@ -22,7 +22,11 @@ namespace Services
         friend class ::MemoryManagerTest;
 
         void *allocateStack(std::uint32_t size_bytes, size_t alignment = alignof(std::max_align_t));
-        void freeStackToMarker(StackAllocater::Marker marker);
+        void freeStackMemory(void* ptr);
+        
+        void* allocateStackUnaligned(std::uint32_t size_bytes);
+        void freeStackMemoryUnaligned(void* ptr);
+
         void freeStack();
 
     private:

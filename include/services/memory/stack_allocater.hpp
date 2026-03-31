@@ -26,6 +26,7 @@ namespace Services
         void freeAligned(void *ptr);
 
         void *alloc(std::uint32_t size_bytes);
+        void freeUnaligned(void*ptr);
 
         void freeToMarker(Marker marker);
         void clear();
