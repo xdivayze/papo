@@ -80,7 +80,7 @@ TEST_F(PoolManagerTest, RegisterPoolCreatesPool)
 TEST_F(PoolManagerTest, RegisterPoolThrowsWhenPoolAlreadyExists)
 {
     manager_.registerPool<int>(4);
-    EXPECT_THROW(manager_.registerPool<int>(4), Util::LogicException *);
+    EXPECT_THROW(manager_.registerPool<int>(4), Util::LogicException);
 }
 
 TEST_F(PoolManagerTest, RegisterPoolAllowsDifferentTypes)
@@ -104,7 +104,7 @@ TEST_F(PoolManagerTest, RegisterIPoolThrowsWhenPoolAlreadyExists)
 {
     manager_.registerPool<Widget>(4);
     auto mock = std::make_unique<MockPool>(4);
-    EXPECT_THROW(manager_.registerIPool<Widget>(std::move(mock)), Util::LogicException *);
+    EXPECT_THROW(manager_.registerIPool<Widget>(std::move(mock)), Util::LogicException);
 }
 
 TEST_F(PoolManagerTest, RegisterIPoolDelegatesAllocToCustomPool)
@@ -128,7 +128,7 @@ TEST_F(PoolManagerTest, AcquireReturnsNonNullFromFreshPool)
 
 TEST_F(PoolManagerTest, AcquireThrowsWhenPoolNotRegistered)
 {
-    EXPECT_THROW(manager_.acquireFromPool<Widget>(), Util::LogicException *);
+    EXPECT_THROW(manager_.acquireFromPool<Widget>(), Util::LogicException);
 }
 
 TEST_F(PoolManagerTest, AcquireReturnsNullWhenPoolExhausted)
@@ -165,7 +165,7 @@ TEST_F(PoolManagerTest, AcquireReturnedPointerIsAligned)
 TEST_F(PoolManagerTest, ReleaseThrowsWhenPoolNotRegistered)
 {
     Widget *dummy = nullptr;
-    EXPECT_THROW(manager_.releaseToPool(dummy), Util::LogicException *);
+    EXPECT_THROW(manager_.releaseToPool(dummy), Util::LogicException);
 }
 
 TEST_F(PoolManagerTest, ReleaseDelegatesFreeToUnderlyingPool)
@@ -220,7 +220,7 @@ TEST_F(PoolManagerTest, RemovePoolSucceeds)
 
 TEST_F(PoolManagerTest, RemovePoolThrowsWhenNotRegistered)
 {
-    EXPECT_THROW(manager_.removePoolAllocater<int>(), Util::LogicException *);
+    EXPECT_THROW(manager_.removePoolAllocater<int>(), Util::LogicException);
 }
 
 TEST_F(PoolManagerTest, RemovePoolDoesNotAffectOtherPools)

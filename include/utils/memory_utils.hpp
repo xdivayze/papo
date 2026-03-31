@@ -13,7 +13,7 @@ namespace Util
         const size_t mask = align - 1;
         if ((align & mask) != 0)
         {
-            throw new Util::PapoException("Stack Allocater", "alignment must be a power of 2");
+            throw Util::PapoException("Stack Allocater", "alignment must be a power of 2");
         }
 
         return (addr + mask) & ~mask;

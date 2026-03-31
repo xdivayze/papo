@@ -45,7 +45,7 @@ namespace Memory
         {
             auto key = std::type_index(typeid(T));
             if (pools_.contains(key))
-                throw new Util::LogicException(TAG, "Pool already exists in pool manager");
+                throw Util::LogicException(TAG, "Pool already exists in pool manager");
 
             pools_[key] = std::unique_ptr<IPool>(new PoolAllocater<T>(capacity));
         }
@@ -63,7 +63,7 @@ namespace Memory
             assert(pool != nullptr);
             auto key = std::type_index(typeid(T));
             if (pools_.contains(key))
-                throw new Util::LogicException(TAG, "Pool already exists in pool manager");
+                throw Util::LogicException(TAG, "Pool already exists in pool manager");
 
             pools_[key] = std::move(pool);
         }
@@ -75,7 +75,7 @@ namespace Memory
             auto key = std::type_index(typeid(T));
             auto foundPool = pools_.find(key);
             if (foundPool == pools_.end())
-                throw new Util::LogicException(TAG, "The pool that is to be removed doesn't exist in the manager");
+                throw Util::LogicException(TAG, "The pool that is to be removed doesn't exist in the manager");
 
             pools_.erase(foundPool);
         }
@@ -87,7 +87,7 @@ namespace Memory
             auto key = std::type_index(typeid(T));
             auto foundPool = pools_.find(key);
             if (foundPool == pools_.end())
-                throw new Util::LogicException(TAG, "The pool that is to be retrieved doesn't exist in the manager");
+                throw Util::LogicException(TAG, "The pool that is to be retrieved doesn't exist in the manager");
 
             return *foundPool->second;
         }
