@@ -22,4 +22,10 @@ namespace Util
         {
         }
     };
+
+    class LogicException : public PapoException
+    {
+    public:
+        LogicException(std::string_view TAG, std::string_view msg) : PapoException(TAG, msg) {}
+    };
 }

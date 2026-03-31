@@ -16,7 +16,6 @@ namespace Memory
         friend class PoolManager;
         virtual size_t capacity() const = 0;
 
-    protected:
         virtual ~IPool() = default;
 
     private:
@@ -79,6 +78,7 @@ namespace Memory
 
     public:
         friend class ::PoolAllocaterTest;
+        friend class PoolManager;
 
         size_t capacity() const override
         {
