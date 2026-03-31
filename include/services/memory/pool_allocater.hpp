@@ -1,17 +1,27 @@
 #pragma once
 #include <cstdlib>
-#include <memory>
 #include <malloc.h>
+#include <algorithm>
 #include "../../utils/memory_utils.hpp"
+
+class PoolAllocaterTest;
+
 namespace Memory
 {
+    class PoolManager;
+
     class IPool
     {
     public:
+        friend class PoolManager;
+        virtual size_t capacity() const = 0;
+
+    protected:
         virtual ~IPool() = default;
+
+    private:
         virtual void *alloc() = 0;
         virtual void free(void *ptr) = 0;
-        virtual size_t capacity() const = 0;
     };
 
     template <typename T>
@@ -23,22 +33,21 @@ namespace Memory
             FreeNode *next;
         };
 
-        static constexpr size_t chunkSize_ = align_up(max(sizeof(T), sizeof(void *)), alignof(T));
+        static constexpr size_t chunkSize_ = Util::align_up(std::max(sizeof(T), sizeof(void *)), alignof(T));
 
         std::byte *memoryBlock_;
         FreeNode *freeHead_;
         size_t poolCapacity_;
         void *rawBlock_;
 
-    public:
         PoolAllocater(size_t capacity) : poolCapacity_(capacity)
         {
             rawBlock_ = malloc(capacity * chunkSize_ + alignof(T) - 1);
             memoryBlock_ = Util::AlignPointer<std::byte>(static_cast<std::byte *>(rawBlock_), alignof(T));
 
-            freeHead_ = static_cast<FreeNode *>(memoryBlock_);
+            freeHead_ = reinterpret_cast<FreeNode *>(memoryBlock_);
             FreeNode *curr = freeHead_;
-            for (int i = 0; i < capacity; i++)
+            for (int i = 0; i < static_cast<int>(capacity); i++)
             {
                 curr->next = reinterpret_cast<FreeNode *>(
                     memoryBlock_ + i * chunkSize_);
@@ -67,6 +76,9 @@ namespace Memory
             chunk->next = freeHead_;
             freeHead_ = chunk;
         }
+
+    public:
+        friend class ::PoolAllocaterTest;
 
         size_t capacity() const override
         {

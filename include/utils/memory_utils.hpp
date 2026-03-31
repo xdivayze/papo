@@ -3,6 +3,11 @@
 
 namespace Util
 {
+    constexpr size_t align_up(size_t size, size_t alignment)
+    {
+        return (size + alignment - 1) & ~(alignment - 1);
+    }
+
     inline uintptr_t AlignAddr(uintptr_t addr, size_t align)
     {
         const size_t mask = align - 1;
