@@ -130,4 +130,11 @@ namespace async
     {
         return !stop_ && acceptNewJobs_;
     }
+
+    void ThreadPoolManager::clearQueue()
+    {
+        std::lock_guard<std::mutex> lock(queueMutex_);
+        while (!taskQueue_.empty())
+            taskQueue_.pop();
+    }
 }

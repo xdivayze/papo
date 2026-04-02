@@ -32,7 +32,7 @@ namespace async
         TaskPriority priority;
         bool operator<(const TaskWrapper &other) const
         {
-            return priority > other.priority;
+            return priority < other.priority;
         }
     };
 
@@ -43,15 +43,18 @@ namespace async
         TaskPriority priority;
         bool operator<(const Task &other) const
         {
-            return priority > other.priority;
+            return priority < other.priority;
         }
     };
+
+    class ThreadPoolManagerTest;
 
     class ThreadPoolManager
     {
 
     public:
         friend class Root;
+        friend class ThreadPoolManagerTest;
 
         template <typename F>
         auto enqueueTask(Task<F> p_task) -> std::future<std::invoke_result_t<F>>;
@@ -62,11 +65,19 @@ namespace async
 
         bool isAcceptingNewJobs();
 
+        void clearQueue();
+
     private:
-        void stopSync(bool discardQueue = false, bool killSelf = false);               // wait for tasks to finish and calls deconstructor
+        /*
+            stops accepting new jobs through enqueueTask()
+            if discardQueue is false waits for the tasks in the queue to finish
+            if killSelf is true deletes itself
+        */
+        void stopSync(bool discardQueue = false, bool killSelf = false);
         std::future<void> stopAsync(bool discardQueue = false, bool killSelf = false); // non blocking stop call similar to stopSync()
 
-        void pauseSync();               // wait for tasks to finish and pause
+        // wait for the current tasks to finish and pause, preserving the current queue
+        void pauseSync();
         std::future<void> pauseAsync(); // non blocking pause call similar to pauseSync()
 
         void resume(); // resume the queue
@@ -78,20 +89,24 @@ namespace async
         robin_hood::unordered_flat_map<std::thread::id, bool> threadAvailabilityMap_; // unordered hashmap that maps thread ids to true(thread isn't working) / false(thread is working)
 
         std::mutex queueMutex_;
-        std::priority_queue<TaskWrapper> taskQueue_; // dynamic allocation by priority_queue is amortized
+        std::priority_queue<TaskWrapper> taskQueue_;
 
-        std::condition_variable cv_;
+        std::condition_variable cv_; //cv to signal worker threads to wake up
 
-        std::vector<std::thread> threads_; // vector rarely if ever gets larger so no runtime memory problems here
+        std::vector<std::thread> threads_;
 
         std::atomic<bool> pause_ = false;
         std::atomic<bool> stop_ = false;
 
-        std::atomic<bool> acceptNewJobs_ = true;
+        std::atomic<bool> acceptNewJobs_ = true; // this field is used by custom reasons to halt job accepting
 
         const size_t numThreads_;
     };
 
+    /*
+        enqueues a task to be done by one of the worker threads
+        throws if the thread pool is not accepting new jobs (see ThreadPoolManager::isAcceptingNewJobs())
+    */
     template <typename F>
     auto ThreadPoolManager::enqueueTask(Task<F> p_task) -> std::future<std::invoke_result_t<F>>
     {
