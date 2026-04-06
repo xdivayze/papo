@@ -3,6 +3,10 @@
 #include <cstdint>
 #include <chrono>
 #include <cmath>
+
+// Forward declaration so TimeManager can grant test-fixture friendship.
+class TimeManagerTest;
+
 namespace Engine
 {
     class Root;
@@ -153,6 +157,8 @@ namespace Service
         void setLongestFramePeriod(uint32_t new_time);
 
     private:
+        friend class ::TimeManagerTest;
+
         // listener subscription
         TimeManager();
         ~TimeManager();
@@ -163,7 +169,7 @@ namespace Service
 
         constexpr inline float calculateAlpha(uint32_t dt) const
         {
-            return 1 - std::expf(-1 * dt / EMATimeConstant_);
+            return 1.0f - std::expf(-1.0f * static_cast<float>(dt) / EMATimeConstant_);
         }
 
         void updateRunningAverage(uint32_t new_period);

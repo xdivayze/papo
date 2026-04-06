@@ -44,11 +44,18 @@ namespace Service
 
     TimeManager::TimeManager() : frameStartListener_()
     {
-
         auto &evtManager = Engine::Root::get().getEventManager();
         auto &bus = evtManager.getEventBus();
         bus.subscribe(PapoEvent::PapoEventFrameStartID, frameStartListener_);
         bus.subscribe(PapoEvent::PapoEventFrameEndID, *this);
+    }
+
+    TimeManager::~TimeManager()
+    {
+        auto &evtManager = Engine::Root::get().getEventManager();
+        auto &bus = evtManager.getEventBus();
+        bus.unsubscribe(PapoEvent::PapoEventFrameStartID, frameStartListener_);
+        bus.unsubscribe(PapoEvent::PapoEventFrameEndID, *this);
     }
 
 }
