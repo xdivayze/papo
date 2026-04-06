@@ -25,7 +25,7 @@ namespace Memory
             size_t capacity_;
             size_t offset_ = 0;
 
-            void *allocate(size_t size, size_t alignment)
+            void *allocate(size_t size, size_t alignment) 
             {
                 offset_ = (offset_ + alignment - 1) & ~(alignment - 1);
                 void *ptr = buffer_ + offset_;
@@ -39,7 +39,7 @@ namespace Memory
 
         void *do_allocate(size_t size_bytes, size_t alignment) override;
 
-        void do_deallocate(void *p, size_t bytes, size_t alignment) override {};
+        void do_deallocate(void *p, size_t bytes, size_t alignment_) override {};
 
         bool do_is_equal(const memory_resource &other) const noexcept override;
 

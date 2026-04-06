@@ -25,13 +25,15 @@ namespace PapoEvent
     class IPapoEventListener
     {
     public:
-        virtual void eventCall(void *payload);
+        virtual void eventCall(void *payload) = 0;
     };
 
     class EventBus
     {
     public:
         void publish(PapoEventGeneric *evt);
+
+        void subscribe(PapoEventTypeID evtID, IPapoEventListener &listener);
 
     private:
         std::unordered_multimap<PapoEventTypeID, IPapoEventListener &> listeners;

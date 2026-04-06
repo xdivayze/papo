@@ -8,12 +8,15 @@ namespace Engine
     class Root;
 }
 
+class PapoEventManagerTest;
+
 namespace PapoEvent
 {
     class PapoEventManager
     {
     public:
-        friend class Root;
+        friend class Engine::Root;
+        friend class ::PapoEventManagerTest;
 
         // returns a write handle to write the payload to the event queue
         template <typename T>
@@ -22,7 +25,7 @@ namespace PapoEvent
             return queue_.push<T>(evtID);
         }
         template <typename T>
-        void pushEvent(PapoEventTypeID evtID, T *payload)
+        void pushEvent(PapoEventTypeID evtID, const T &payload)
         {
             return queue_.push<T>(evtID, payload);
         }
