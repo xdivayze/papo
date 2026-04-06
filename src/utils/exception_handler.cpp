@@ -3,7 +3,7 @@
 
 constexpr const char *TAG = "EXCEPTION HANDLER";
 
-static Services::Logger *s_logger = nullptr;
+static Service::Logger *s_logger = nullptr;
 
 static void terminateHandler()
 {
@@ -29,7 +29,7 @@ static void terminateHandler()
 
 namespace Util
 {
-    void handleException(Services::Logger *logger, const std::exception &e)
+    void handleException(Service::Logger *logger, const std::exception &e)
     {
         if (const auto *papo = dynamic_cast<const Util::PapoException *>(&e))
         {
@@ -41,7 +41,7 @@ namespace Util
         }
     }
 
-    void installTerminateHandler(Services::Logger *logger)
+    void installTerminateHandler(Service::Logger *logger)
     {
         s_logger = logger;
         std::set_terminate(terminateHandler);

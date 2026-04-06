@@ -6,12 +6,12 @@ class MemoryManagerTest : public ::testing::Test
 {
 protected:
     static constexpr std::uint32_t STACK_SIZE = 256;
-    Services::MemoryManager *mgr_;
+    Service::MemoryManager *mgr_;
 
     void SetUp() override
     {
-        Services::MemoryManager::MemoryManagerContext ctx{STACK_SIZE};
-        mgr_ = new Services::MemoryManager(&ctx);
+        Service::MemoryManager::MemoryManagerContext ctx{STACK_SIZE};
+        mgr_ = new Service::MemoryManager(&ctx);
     }
 
     void TearDown() override
@@ -32,12 +32,12 @@ protected:
     }
     void doFreeStackMemoryUnaligned(void *ptr) { mgr_->freeStackMemoryUnaligned(ptr); }
 
-    Services::StackAllocater::Marker getMarker() { return mgr_->stackAllocater_->getMarker(); }
+    Service::StackAllocater::Marker getMarker() { return mgr_->stackAllocater_->getMarker(); }
 
-    void doRecreate(Services::MemoryManager::MemoryManagerContext *ctx)
+    void doRecreate(Service::MemoryManager::MemoryManagerContext *ctx)
     {
         delete mgr_;
-        mgr_ = new Services::MemoryManager(ctx);
+        mgr_ = new Service::MemoryManager(ctx);
     }
 };
 
@@ -85,7 +85,7 @@ TEST_F(MemoryManagerTest, FreeStackMemoryRestoresMarkerAfterFirstAlloc)
 {
     // Lay down a baseline with unaligned alloc so we can track the marker exactly.
     doAllocateStackUnaligned(32);
-    Services::StackAllocater::Marker baseline = getMarker();
+    Service::StackAllocater::Marker baseline = getMarker();
 
     void *ptr = doAllocateStack(16, 16);
     doAllocateStack(8, 8);
@@ -98,7 +98,7 @@ TEST_F(MemoryManagerTest, FreeStackMemoryRestoresMarkerAfterFirstAlloc)
 TEST_F(MemoryManagerTest, FreeStackMemoryNullIsNoOp)
 {
     doAllocateStack(16);
-    Services::StackAllocater::Marker before = getMarker();
+    Service::StackAllocater::Marker before = getMarker();
     EXPECT_NO_THROW(doFreeStackMemory(nullptr));
     EXPECT_EQ(getMarker(), before);
 }

@@ -7,7 +7,7 @@
 #include "utils/exception.hpp"
 constexpr const char *TAG = "Stack Allocater";
 
-namespace Services
+namespace Service
 {
     StackAllocater::Marker StackAllocater::pointerToMarker(void *ptr)
     {

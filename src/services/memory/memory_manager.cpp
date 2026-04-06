@@ -2,7 +2,7 @@
 
 constexpr const std::uint32_t DEFAULT_STACK_LOCK_SIZE_BYTES = (1 << 10) << 10; // 1M
 
-namespace Services
+namespace Service
 {
 
     void *MemoryManager::allocateStack(std::uint32_t size_bytes, size_t alignment)

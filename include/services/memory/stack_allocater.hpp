@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstddef>
 class StackAllocaterTest;
-namespace Services
+namespace Service
 {
     class MemoryManager;
     class StackAllocater

@@ -6,15 +6,15 @@ class StackAllocaterTest : public ::testing::Test
 {
 protected:
     static constexpr std::uint32_t STACK_SIZE = 256;
-    Services::StackAllocater alloc{STACK_SIZE};
+    Service::StackAllocater alloc{STACK_SIZE};
 
     void *doAlloc(std::uint32_t size_bytes) { return alloc.alloc(size_bytes); }
     void doClear() { alloc.clear(); }
-    void doFreeToMarker(Services::StackAllocater::Marker marker) { alloc.freeToMarker(marker); }
+    void doFreeToMarker(Service::StackAllocater::Marker marker) { alloc.freeToMarker(marker); }
     void *doAllocAligned(std::uint32_t size_bytes, size_t alignment) { return alloc.allocAligned(size_bytes, alignment); }
     void doFreeAligned(void *ptr) { alloc.freeAligned(ptr); }
     void doFreeUnaligned(void *ptr) { alloc.freeUnaligned(ptr); }
-    Services::StackAllocater::Marker doPointerToMarker(void *ptr) { return alloc.pointerToMarker(ptr); }
+    Service::StackAllocater::Marker doPointerToMarker(void *ptr) { return alloc.pointerToMarker(ptr); }
 };
 
 // --- unaligned alloc ---
@@ -75,7 +75,7 @@ TEST_F(StackAllocaterTest, AllocAfterClearSucceeds)
 
 TEST_F(StackAllocaterTest, FreeToMarkerRestoresPreviousMarker)
 {
-    Services::StackAllocater::Marker before = alloc.getMarker();
+    Service::StackAllocater::Marker before = alloc.getMarker();
     doAlloc(32);
     doFreeToMarker(before);
     EXPECT_EQ(alloc.getMarker(), before);
@@ -84,7 +84,7 @@ TEST_F(StackAllocaterTest, FreeToMarkerRestoresPreviousMarker)
 TEST_F(StackAllocaterTest, FreeToCurrentMarkerIsNoOp)
 {
     doAlloc(32);
-    Services::StackAllocater::Marker current = alloc.getMarker();
+    Service::StackAllocater::Marker current = alloc.getMarker();
     doFreeToMarker(current);
     EXPECT_EQ(alloc.getMarker(), current);
 }
@@ -92,14 +92,14 @@ TEST_F(StackAllocaterTest, FreeToCurrentMarkerIsNoOp)
 TEST_F(StackAllocaterTest, FreeToMarkerAheadOfCurrentThrows)
 {
     doAlloc(16);
-    Services::StackAllocater::Marker ahead = alloc.getMarker() + 8;
+    Service::StackAllocater::Marker ahead = alloc.getMarker() + 8;
     EXPECT_THROW(doFreeToMarker(ahead), Util::MemoryException);
 }
 
 TEST_F(StackAllocaterTest, FreeToMarkerThrowIsCatchableAsMemoryException)
 {
     doAlloc(16);
-    Services::StackAllocater::Marker ahead = alloc.getMarker() + 1;
+    Service::StackAllocater::Marker ahead = alloc.getMarker() + 1;
     EXPECT_THROW(
         {
             try { doFreeToMarker(ahead); }
@@ -110,8 +110,8 @@ TEST_F(StackAllocaterTest, FreeToMarkerThrowIsCatchableAsMemoryException)
 
 TEST_F(StackAllocaterTest, GetMarkerReturnsConsistentValueWithoutAlloc)
 {
-    Services::StackAllocater::Marker m1 = alloc.getMarker();
-    Services::StackAllocater::Marker m2 = alloc.getMarker();
+    Service::StackAllocater::Marker m1 = alloc.getMarker();
+    Service::StackAllocater::Marker m2 = alloc.getMarker();
     EXPECT_EQ(m1, m2);
 }
 
@@ -170,7 +170,7 @@ TEST_F(StackAllocaterTest, AllocAlignedThatWouldExceedCapacityThrows)
 TEST_F(StackAllocaterTest, FreeAlignedNullIsNoOp)
 {
     doAllocAligned(16, 16);
-    Services::StackAllocater::Marker before = alloc.getMarker();
+    Service::StackAllocater::Marker before = alloc.getMarker();
     EXPECT_NO_THROW(doFreeAligned(nullptr));
     EXPECT_EQ(alloc.getMarker(), before);
 }
@@ -178,7 +178,7 @@ TEST_F(StackAllocaterTest, FreeAlignedNullIsNoOp)
 TEST_F(StackAllocaterTest, FreeAlignedFirstPtrFreesSubsequentAllocations)
 {
     void *ptr1 = doAllocAligned(16, 16);
-    Services::StackAllocater::Marker afterFirst = alloc.getMarker();
+    Service::StackAllocater::Marker afterFirst = alloc.getMarker();
     doAllocAligned(8, 8);
 
     doFreeAligned(ptr1);
@@ -210,7 +210,7 @@ TEST_F(StackAllocaterTest, FreeUnalignedOnLatestPtrIsNoOp)
 {
     doAlloc(16);
     void *ptr = doAlloc(24);
-    Services::StackAllocater::Marker current = alloc.getMarker();
+    Service::StackAllocater::Marker current = alloc.getMarker();
 
     doFreeUnaligned(ptr);
 

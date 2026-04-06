@@ -4,8 +4,8 @@ namespace Engine
 {
     Root::Root()
     {
-        logger_ = new Services::Logger();
-        memoryManager_ = new Services::MemoryManager(nullptr);
+        logger_ = new Service::Logger();
+        memoryManager_ = new Service::MemoryManager(nullptr);
     }
 
     Root::~Root()

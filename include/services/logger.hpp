@@ -11,7 +11,7 @@ enum class LogLevel
 
 namespace Engine { class Root; }
 
-namespace Services
+namespace Service
 {
     class Logger
     {

@@ -9,8 +9,8 @@ namespace Engine
     class Root : public Singleton<Root>
     {
     public:
-        Services::Logger *logger_;
-        Services::MemoryManager *memoryManager_;
+        Service::Logger *logger_;
+        Service::MemoryManager *memoryManager_;
 
         constexpr PapoEvent::PapoEventManager &getEventManager()
         {

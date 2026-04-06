@@ -8,7 +8,7 @@ namespace Engine
 {
     class Root;
 }
-namespace Services
+namespace Service
 {
     class MemoryManager
     {
