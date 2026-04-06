@@ -30,7 +30,7 @@ namespace Services
         void freeStack();
 
     private:
-        StackAllocater *stackAllocater_;
+        StackAllocater *stackAllocater_; //TODO change to shared pointer
 
         explicit MemoryManager(MemoryManagerContext *ctx);
         ~MemoryManager();
