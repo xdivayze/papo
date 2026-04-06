@@ -38,6 +38,8 @@ namespace PapoEvent
 
         void subscribe(PapoEventTypeID evtID, IPapoEventListener &listener);
 
+        void unsubscribe(PapoEventTypeID evtID, IPapoEventListener &listener);
+
     private:
         std::unordered_multimap<PapoEventTypeID, IPapoEventListener &> listeners;
     };

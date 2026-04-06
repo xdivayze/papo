@@ -320,6 +320,63 @@ TEST_F(EventBusTest, SubscribeSameListenerTwiceCallsItTwice)
     EXPECT_EQ(listener.callCount, 2);
 }
 
+TEST_F(EventBusTest, UnsubscribeStopsListenerFromBeingCalled)
+{
+    MockListener listener;
+    bus.subscribe(EVT_POSITION, listener);
+    bus.unsubscribe(EVT_POSITION, listener);
+
+    PositionEvent p{};
+    publishOn(bus, EVT_POSITION, &p);
+
+    EXPECT_EQ(listener.callCount, 0);
+}
+
+TEST_F(EventBusTest, UnsubscribeLeavesOtherListenersIntact)
+{
+    MockListener a, b;
+    bus.subscribe(EVT_POSITION, a);
+    bus.subscribe(EVT_POSITION, b);
+    bus.unsubscribe(EVT_POSITION, a);
+
+    PositionEvent p{};
+    publishOn(bus, EVT_POSITION, &p);
+
+    EXPECT_EQ(a.callCount, 0);
+    EXPECT_EQ(b.callCount, 1);
+}
+
+TEST_F(EventBusTest, UnsubscribeForDifferentTypeDoesNotRemoveListener)
+{
+    MockListener listener;
+    bus.subscribe(EVT_POSITION, listener);
+    bus.unsubscribe(EVT_COUNTER, listener);  // wrong type — should be a no-op
+
+    PositionEvent p{};
+    publishOn(bus, EVT_POSITION, &p);
+
+    EXPECT_EQ(listener.callCount, 1);
+}
+
+TEST_F(EventBusTest, UnsubscribeNotRegisteredListenerDoesNotCrash)
+{
+    MockListener listener;
+    EXPECT_NO_THROW(bus.unsubscribe(EVT_POSITION, listener));
+}
+
+TEST_F(EventBusTest, UnsubscribeRemovesAllInstancesOfDuplicateSubscription)
+{
+    MockListener listener;
+    bus.subscribe(EVT_POSITION, listener);
+    bus.subscribe(EVT_POSITION, listener);
+    bus.unsubscribe(EVT_POSITION, listener);
+
+    PositionEvent p{};
+    publishOn(bus, EVT_POSITION, &p);
+
+    EXPECT_EQ(listener.callCount, 0);
+}
+
 TEST_F(EventBusTest, PublishMultipleEventsCallsListenerEachTime)
 {
     MockListener listener;

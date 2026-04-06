@@ -22,6 +22,18 @@ namespace PapoEvent
         listeners.emplace(evtID, listener);
     }
 
+    void EventBus::unsubscribe(PapoEventTypeID evtID, IPapoEventListener &listener)
+    {
+        auto [begin, end] = listeners.equal_range(evtID);
+        for (auto it = begin; it != end;)
+        {
+            if (&it->second == &listener)
+                it = listeners.erase(it);
+            else
+                ++it;
+        }
+    }
+
     void PapoEventManager::publishAll()
     {
 
