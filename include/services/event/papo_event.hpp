@@ -7,6 +7,9 @@ namespace PapoEvent
     // a type that maps to one or more events in the event bus
     typedef uint32_t PapoEventTypeID;
 
+    constexpr const PapoEventTypeID PapoEventFrameStartID = 5;
+    constexpr const PapoEventTypeID PapoEventFrameEndID = 6;
+
     constexpr const PapoEventTypeID PapoEventQueueEnd = UINT32_MAX;
 
     struct PapoEventHeader

@@ -7,6 +7,7 @@ add_library(services
     async/thread_pool_manager.cpp
     memory/arena_allocator.cpp
     event/papo_event_manager.cpp
+    time_manager.cpp
     )
 
 target_include_directories(services PUBLIC

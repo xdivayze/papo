@@ -30,6 +30,16 @@ namespace PapoEvent
             return queue_.push<T>(evtID, payload);
         }
 
+        void pushEvent(PapoEventTypeID evtID)
+        {
+            return queue_.push(evtID);
+        }
+
+        constexpr EventBus &getEventBus()
+        {
+            return bus_;
+        }
+
         // publishes all events in the queue and notifies all listeners in the bus listening for that event type
         void publishAll();
 
