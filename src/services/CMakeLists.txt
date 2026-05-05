@@ -8,6 +8,7 @@ add_library(services
     memory/arena_allocator.cpp
     event/papo_event_manager.cpp
     time_manager.cpp
+    render/mesh.cpp
     )
 
 target_include_directories(services PUBLIC

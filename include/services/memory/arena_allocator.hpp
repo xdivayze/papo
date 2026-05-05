@@ -1,7 +1,5 @@
 #pragma once
-#include <cstdint>
 #include <cstddef>
-#include <array>
 #include <memory_resource>
 #include <cassert>
 namespace Memory

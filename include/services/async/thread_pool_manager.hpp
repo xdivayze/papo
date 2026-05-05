@@ -9,6 +9,9 @@
 #include "../../collections/robin_hood.hpp"
 #include "../../utils/exception.hpp"
 
+//TODO keep this but also implement a coroutine task system on top
+//TODO pin the threads on cores using cpu affinity
+
 namespace Engine
 {
     class Root;
@@ -89,12 +92,12 @@ namespace async
         robin_hood::unordered_flat_map<std::thread::id, bool> threadAvailabilityMap_; // unordered hashmap that maps thread ids to true(thread isn't working) / false(thread is working)
 
         std::mutex queueMutex_;
-        std::priority_queue<TaskWrapper> taskQueue_;
+        std::priority_queue<TaskWrapper> taskQueue_; //TODO might want to switch to a more cache friendly option
 
         std::condition_variable cv_; //cv to signal worker threads to wake up
 
         std::vector<std::thread> threads_;
-
+        
         std::atomic<bool> pause_ = false;
         std::atomic<bool> stop_ = false;
 

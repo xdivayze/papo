@@ -50,6 +50,7 @@ namespace PapoEvent
         EventBus bus_;
 
         // events to be published in the next frame, reset at the beginning of each frame
+        // arena buffer is cache friendly :thumbsup:
         EventQueue queue_;
     };
 }

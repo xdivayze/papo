@@ -3,7 +3,6 @@
 #include "logger.hpp"
 #include "memory/memory_manager.hpp"
 #include "event/papo_event_manager.hpp"
-#include <memory>
 namespace Engine
 {
     class Root : public Singleton<Root>
