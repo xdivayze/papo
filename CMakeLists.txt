@@ -24,3 +24,16 @@ add_subdirectory(external/glad/cmake EXCLUDE_FROM_ALL)
 glad_add_library(glad STATIC API gl:core=4.6)
 
 target_link_libraries(services PUBLIC glfw glad)
+
+# Assimp — only build what we need
+set(ASSIMP_BUILD_TESTS              OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL                  OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS       OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_OBJ_IMPORTER       ON  CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER      ON  CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_FBX_IMPORTER       ON  CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB               ON  CACHE BOOL "" FORCE)
+add_subdirectory(external/assimp EXCLUDE_FROM_ALL)
+target_link_libraries(services PUBLIC assimp)

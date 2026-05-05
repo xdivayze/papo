@@ -1,5 +1,4 @@
 #pragma once
-#include <queue>
 #include "papo_event.hpp"
 #include "event_queue.hpp"
 

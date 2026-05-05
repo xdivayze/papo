@@ -1,7 +1,6 @@
 #include "services/memory/stack_allocater.hpp"
 #include <cstdlib>
 #include <cstddef>
-#include <stdexcept>
 #include "utils/exception.hpp"
 #include "utils/memory_utils.hpp"
 #include "utils/exception.hpp"

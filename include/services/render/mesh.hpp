@@ -2,13 +2,11 @@
 
 #include "glad/gl.h"
 
-#include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float2.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "glm/ext/vector_float4.hpp"
 #include "utils/exception.hpp"
 #include <cstddef>
-#include <vector>
 
 namespace VertexTypes {
 
@@ -110,88 +108,53 @@ public:
 
   friend class AssetManager;
 
-  // submeshes are assumed to be already loaded into gpu memory
-  struct SubMesh {
-    unsigned int VAO, VBO, EBO;
-    unsigned int indexCount;
-
-    // default empty cpu vertex data
-    std::vector<TVertex> vertices;
-    std::vector<unsigned int> indices;
-  };
-
-  struct SubMeshEntry {
-    glm::mat4 subMeshTransform;
-    SubMesh subMesh;
-  };
-
   // mesh object to be copied to the GPU memory bound by the passed vertex and
   // element objects
-  Mesh(std::vector<SubMeshEntry> subMeshEntries, std::vector<TVertex> vertices,
-       std::vector<unsigned int> indices, unsigned int VAO, unsigned int VBO,
+  Mesh(TVertex *vertices, unsigned int vertexCount, unsigned int *indices,
+       unsigned int indexCount, unsigned int VAO, unsigned int VBO,
        unsigned int EBO)
-      : vertices_(std::move(vertices)), indices_(std::move(indices)), VAO_(VAO),
-        VBO_(VBO), EBO_(EBO), indexCount_(indices_.size()),
-        subMeshes_(std::move(subMeshEntries)) {}
+      : vertices_(vertices), vertexCount_(vertexCount), indices_(indices),
+        VAO_(VAO), VBO_(VBO), EBO_(EBO), indexCount_(indexCount) {}
 
   // mesh object needs to be created in the GPU memory
-  Mesh(std::vector<SubMeshEntry> subMeshEntries, std::vector<TVertex> vertices,
-       std::vector<unsigned int> indices);
+  Mesh(TVertex *vertices, unsigned int vertexCount, unsigned int *indices,
+       unsigned int indexCount);
 
-  // mesh object without submeshes. Needs to be created in the GPU memory
-  Mesh(std::vector<TVertex> vertices, std::vector<unsigned int> indices)
-      : Mesh<TVertex>(std::vector<SubMeshEntry>(), std::move(vertices),
-                      std::move(indices)) {}
-
-  // mesh object without submeshes. mesh object to be copied to the GPU memory
-  // bound by the passed vertex and element objects
-  Mesh(std::vector<TVertex> vertices, std::vector<unsigned int> indices,
-       unsigned int VAO, unsigned int VBO, unsigned int EBO)
-      : Mesh<TVertex>(std::vector<SubMeshEntry>(), std::move(vertices),
-                      std::move(indices), VAO, VBO, EBO) {}
-
-  // mesh object already in the GPU memory, no submeshes
+  // mesh object already in the GPU memory
   Mesh(unsigned int VAO, unsigned int VBO, unsigned int EBO,
        unsigned int indexCount)
       : VAO_(VAO), VBO_(VBO), EBO_(EBO), indexCount_(indexCount),
         preLoaded_(true) {}
 
-  // mesh object already in the GPU memory
-  Mesh(std::vector<SubMeshEntry> subMeshEntries, unsigned int VAO,
-       unsigned int VBO, unsigned int EBO, unsigned int indexCount)
-      : subMeshes_(subMeshEntries), VAO_(VAO), VBO_(VBO), EBO_(EBO),
-        indexCount_(indexCount), preLoaded_(true) {}
-
   ~Mesh();
 
 private:
-  void Load(bool cleanCPUData = true);
+  void Load();
 
-  std::vector<TVertex> vertices_;
-  std::vector<unsigned int> indices_;
+  TVertex *vertices_;
+  unsigned int vertexCount_;
+
+  unsigned int *indices_;
 
   unsigned int VAO_, VBO_, EBO_;
   unsigned int indexCount_;
-
-  std::vector<SubMeshEntry> subMeshes_;
 
   bool preLoaded_ = false;
 };
 } // namespace Service
 
-// TODO move to asset manager
 template <VertexTypes::VertexLayout TVertex>
-void Service::Mesh<TVertex>::Load(bool cleanCPUData) {
+void Service::Mesh<TVertex>::Load() {
   glBindVertexArray(VAO_);
   glBindBuffer(GL_ARRAY_BUFFER, VBO_);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_);
 
   if (!preLoaded_) {
-    glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(vertices_[0]),
-                 vertices_.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount_ * sizeof(vertices_[0]),
+                 vertices_, GL_STATIC_DRAW);
 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount_ * sizeof(indices_[0]),
-                 indices_.data(), GL_STATIC_DRAW);
+                 indices_, GL_STATIC_DRAW);
   }
 
   TVertex::SetupAttribs();
@@ -200,20 +163,19 @@ void Service::Mesh<TVertex>::Load(bool cleanCPUData) {
 }
 
 template <VertexTypes::VertexLayout TVertex>
-Service::Mesh<TVertex>::Mesh(
-    std::vector<typename Service::Mesh<TVertex>::SubMeshEntry> subMeshEntries,
-    std::vector<TVertex> vertices, std::vector<unsigned int> indices)
-    : subMeshes_(std::move(subMeshEntries)) {
-  if (vertices.size() == 0) {
+Service::Mesh<TVertex>::Mesh(TVertex *vertices, unsigned int vertexCount,
+                             unsigned int *indices, unsigned int indexCount) {
+  if (vertexCount == 0) {
     throw Util::PapoException(TAG, "0 length vertex array not allowed");
   }
-  if (indices.size() == 0) {
+  if (indexCount == 0) {
     throw Util::PapoException(TAG, "0 length index array not allowed");
   }
-  indices_ = std::move(indices);
-  indexCount_ = indices_.size();
+  indices_ = indices;
+  indexCount_ = indexCount;
 
-  vertices_ = std::move(vertices);
+  vertices_ = vertices;
+  vertexCount_ = vertexCount;
 
   glGenVertexArrays(1, &VAO_);
   glGenBuffers(1, &VBO_);
