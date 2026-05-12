@@ -9,6 +9,7 @@ add_library(services
     event/papo_event_manager.cpp
     time_manager.cpp
     render/mesh.cpp
+    render/model.cpp
     )
 
 target_include_directories(services PUBLIC

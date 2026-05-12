@@ -5,10 +5,12 @@ class StackAllocaterTest;
 namespace Service
 {
     class MemoryManager;
+    class Model;
     class StackAllocater
     {
     public:
         friend class MemoryManager;
+        friend class Model;
         friend class ::StackAllocaterTest;
 
         typedef std::uint32_t Marker;
