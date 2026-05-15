@@ -81,6 +81,8 @@ protected:
     unsigned int vbo(const M &m) { return m.VBO_; }
     unsigned int ebo(const M &m) { return m.EBO_; }
     bool preLoaded(const M &m) { return m.preLoaded_; }
+    bool buffersInitialized(const M &m) { return m.buffersInitialized_; }
+    void doInitBuffers(M &m) { m.initBuffers(); }
     void doLoad(M &m) { m.Load(); }
 };
 
@@ -183,6 +185,56 @@ TEST_F(MeshTest, ExternalBuffersCtorStoresAllFields)
     EXPECT_EQ(vao(m), 5u);
     EXPECT_EQ(vbo(m), 6u);
     EXPECT_EQ(ebo(m), 7u);
+}
+
+// --- deferred GL buffer initialization ---
+
+TEST_F(MeshTest, ImmediateCtorMarksBuffersInitialized)
+{
+    VertexTypes::Vertex1P v[3]{};
+    unsigned int idx[3] = {0, 1, 2};
+    M m(v, 3, idx, 3); // default: deferBufferInit == false
+
+    EXPECT_TRUE(buffersInitialized(m));
+    EXPECT_NE(vao(m), 0u);
+}
+
+TEST_F(MeshTest, DeferredCtorDoesNotGenerateBuffers)
+{
+    VertexTypes::Vertex1P v[3]{};
+    unsigned int idx[3] = {0, 1, 2};
+    M m(v, 3, idx, 3, /*deferBufferInit=*/true);
+
+    EXPECT_FALSE(buffersInitialized(m));
+    EXPECT_EQ(vao(m), 0u);
+    EXPECT_EQ(vbo(m), 0u);
+    EXPECT_EQ(ebo(m), 0u);
+}
+
+TEST_F(MeshTest, InitBuffersGeneratesAndIsIdempotent)
+{
+    VertexTypes::Vertex1P v[3]{};
+    unsigned int idx[3] = {0, 1, 2};
+    M m(v, 3, idx, 3, /*deferBufferInit=*/true);
+
+    doInitBuffers(m);
+    EXPECT_TRUE(buffersInitialized(m));
+    unsigned int vao0 = vao(m);
+    EXPECT_NE(vao0, 0u);
+
+    doInitBuffers(m);              // idempotent: no regeneration
+    EXPECT_EQ(vao(m), vao0);
+}
+
+TEST_F(MeshTest, DeferredMeshLoadLazilyInitializesBuffers)
+{
+    VertexTypes::Vertex1P v[3]{};
+    unsigned int idx[3] = {0, 1, 2};
+    M m(v, 3, idx, 3, /*deferBufferInit=*/true);
+
+    EXPECT_NO_THROW(doLoad(m)); // Load() must self-initialize on the GL thread
+    EXPECT_TRUE(buffersInitialized(m));
+    EXPECT_NE(vao(m), 0u);
 }
 
 // --- destructor: releasing GL objects must not crash with a live context ---

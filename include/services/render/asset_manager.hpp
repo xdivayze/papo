@@ -5,9 +5,18 @@
 #include "services/memory/memory_manager.hpp"
 #include "services/memory/pool_manager.hpp"
 #include "services/memory/stack_allocater.hpp"
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
+#include <future>
+#include <mutex>
+#include <string>
 #include <string_view>
+#include <vector>
+
+namespace async {
+class ThreadPoolManager;
+}
 
 namespace Service {
 
@@ -26,9 +35,20 @@ public:
 
   void loadModelToGPU(ModelHandle<Model> model, bool cleanLastCPUData);
 
-  ModelHandle<Model> modelFromFilePath(std::string_view filepath);
+  // When deferGL is true the Model is built without generating GL buffers
+  // (safe off the render thread). The buffers are created lazily on the
+  // first loadModelToGPU, or explicitly via Model::initializeMeshBuffers().
+  ModelHandle<Model> modelFromFilePath(std::string_view filepath,
+                                       bool deferGL = false);
 
-  AssetManager();
+  // Same as modelFromFilePath but the load runs on a thread-pool worker.
+  // The returned future yields the handle (or rethrows the load exception
+  // via .get()). Thread-safe against concurrent sync/async calls.
+  std::future<ModelHandle<Model>>
+  modelFromFilePathAsync(async::ThreadPoolManager &pool,
+                         std::string_view filepath);
+
+  AssetManager(Memory::PoolManager& poolManager, MemoryManager& memoryManager_, size_t nstacks);
   ~AssetManager();
 
 private:
@@ -44,5 +64,9 @@ private:
       allocatorLeaseMap; // stack allocator lease map
   robin_hood::unordered_flat_map<std::string, ModelHandle<Model>>
       cache_; // asset cache
+
+  std::vector<StackAllocater *> freeStacks_; // available stack leases
+  std::mutex leaseMutex_;
+  std::condition_variable leaseCv_;
 };
 } // namespace Service

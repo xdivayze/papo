@@ -7,11 +7,13 @@ namespace Service
 {
     class MemoryManager;
     class Model;
+    class AssetManager;
     class StackAllocater
     {
     public:
         friend class MemoryManager;
         friend class Model;
+        friend class AssetManager;
         friend class ::StackAllocaterTest;
         friend class ::ModelTest;
 

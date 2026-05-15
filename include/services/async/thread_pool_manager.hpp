@@ -12,6 +12,8 @@
 //TODO keep this but also implement a coroutine task system on top
 //TODO pin the threads on cores using cpu affinity
 
+class AssetManagerTest;
+
 namespace Engine
 {
     class Root;
@@ -58,6 +60,7 @@ namespace async
     public:
         friend class Root;
         friend class ThreadPoolManagerTest;
+        friend class ::AssetManagerTest;
 
         template <typename F>
         auto enqueueTask(Task<F> p_task) -> std::future<std::invoke_result_t<F>>;

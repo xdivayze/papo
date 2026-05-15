@@ -44,10 +44,20 @@ public:
   // pointer arrays + instance array live inline in Model (or on heap if
   // their counts exceed the inline caps), so the Model object survives
   // independently of the stack.
+  // When deferBufferInit is true, the per-mesh GL buffers are NOT generated
+  // during construction (so the ctor can run on a worker thread). Call
+  // initializeMeshBuffers() afterwards on the GL thread (or rely on Load(),
+  // which lazily initializes any mesh whose buffers are still pending).
   Model(Memory::PoolManager &poolManager, StackAllocater *stack,
-        std::string_view filepath, std::uint32_t id);
+        std::string_view filepath, std::uint32_t id,
+        bool deferBufferInit = false);
 
   ~Model();
+
+  // Generate the GL buffers for every mesh. Idempotent; must run on a thread
+  // with a current GL context. Intended to be called after a deferred
+  // (worker-thread) construction once back on the render thread.
+  void initializeMeshBuffers();
 
   std::uint32_t transientMarker() const { return transientMarker_; }
   StackAllocater *stack() const { return stack_; }

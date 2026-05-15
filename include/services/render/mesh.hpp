@@ -8,6 +8,12 @@
 #include "utils/exception.hpp"
 #include <cstddef>
 
+// TODO current setup has too much overhead on account of GL loading the data to
+// the GPU through glBufferData this should be fixed bc even though i am getting
+// claude to write the code just the pure effort it takes to architecture the
+// memory hierarchy is exhausting. I am hoping to use custom memory layout in GL
+// as well (one huge VBO EBO etc later allocated through allocaters)
+
 class MeshTest;
 
 namespace VertexTypes {
@@ -118,37 +124,61 @@ public:
        unsigned int indexCount, unsigned int VAO, unsigned int VBO,
        unsigned int EBO)
       : vertices_(vertices), vertexCount_(vertexCount), indices_(indices),
-        VAO_(VAO), VBO_(VBO), EBO_(EBO), indexCount_(indexCount) {}
+        VAO_(VAO), VBO_(VBO), EBO_(EBO), indexCount_(indexCount),
+        buffersInitialized_(true) {}
 
-  // mesh object needs to be created in the GPU memory
+  // mesh object needs to be created in the GPU memory. When deferBufferInit
+  // is true the VAO/VBO/EBO are NOT generated here (no GL call) — call
+  // initBuffers() later on a thread with a current GL context. This lets the
+  // CPU-side load run on a worker thread (deferred-GL design).
   Mesh(TVertex *vertices, unsigned int vertexCount, unsigned int *indices,
-       unsigned int indexCount);
+       unsigned int indexCount, bool deferBufferInit = false);
 
   // mesh object already in the GPU memory
   Mesh(unsigned int VAO, unsigned int VBO, unsigned int EBO,
        unsigned int indexCount)
       : VAO_(VAO), VBO_(VBO), EBO_(EBO), indexCount_(indexCount),
-        preLoaded_(true) {}
+        preLoaded_(true), buffersInitialized_(true) {}
 
   ~Mesh();
 
 private:
   void Load();
 
+  // Generate the VAO/VBO/EBO. Idempotent: a no-op once buffersInitialized_.
+  // Requires a current GL context on the calling thread.
+  void initBuffers();
+
   TVertex *vertices_;
   unsigned int vertexCount_;
 
   unsigned int *indices_;
 
-  unsigned int VAO_, VBO_, EBO_;
+  unsigned int VAO_ = 0, VBO_ = 0, EBO_ = 0;
   unsigned int indexCount_;
 
   bool preLoaded_ = false;
+  bool buffersInitialized_ = false;
 };
 } // namespace Service
 
 template <VertexTypes::VertexLayout TVertex>
+void Service::Mesh<TVertex>::initBuffers() {
+  if (buffersInitialized_)
+    return;
+  glGenVertexArrays(1, &VAO_);
+  glGenBuffers(1, &VBO_);
+  glGenBuffers(1, &EBO_);
+  buffersInitialized_ = true;
+}
+
+template <VertexTypes::VertexLayout TVertex>
 void Service::Mesh<TVertex>::Load() {
+  // Reflect deferred-GL: if buffers were never generated (built on a worker
+  // thread), do it now — Load() always runs on the GL thread.
+  if (!buffersInitialized_)
+    initBuffers();
+
   glBindVertexArray(VAO_);
   glBindBuffer(GL_ARRAY_BUFFER, VBO_);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_);
@@ -168,7 +198,8 @@ void Service::Mesh<TVertex>::Load() {
 
 template <VertexTypes::VertexLayout TVertex>
 Service::Mesh<TVertex>::Mesh(TVertex *vertices, unsigned int vertexCount,
-                             unsigned int *indices, unsigned int indexCount) {
+                             unsigned int *indices, unsigned int indexCount,
+                             bool deferBufferInit) {
   if (vertexCount == 0) {
     throw Util::PapoException(TAG, "0 length vertex array not allowed");
   }
@@ -181,9 +212,8 @@ Service::Mesh<TVertex>::Mesh(TVertex *vertices, unsigned int vertexCount,
   vertices_ = vertices;
   vertexCount_ = vertexCount;
 
-  glGenVertexArrays(1, &VAO_);
-  glGenBuffers(1, &VBO_);
-  glGenBuffers(1, &EBO_);
+  if (!deferBufferInit)
+    initBuffers(); // immediate (default): generate GL objects now
 }
 
 template <VertexTypes::VertexLayout TVertex> Service::Mesh<TVertex>::~Mesh() {

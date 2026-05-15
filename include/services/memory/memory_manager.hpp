@@ -3,6 +3,7 @@
 #include "stack_allocater.hpp"
 #include <cstddef>
 class MemoryManagerTest;
+class AssetManagerTest;
 namespace Engine
 {
     class Root;
@@ -19,6 +20,7 @@ namespace Service
 
         friend class Engine::Root;
         friend class ::MemoryManagerTest;
+        friend class ::AssetManagerTest;
 
         void *allocateStack(std::uint32_t size_bytes, size_t alignment = alignof(std::max_align_t));
         void freeStackMemory(void* ptr);

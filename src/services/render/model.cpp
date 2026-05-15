@@ -80,8 +80,14 @@ T *Model::stackAlloc(StackAllocater *stack, std::size_t count) {
       static_cast<std::uint32_t>(sizeof(T) * count), alignof(T)));
 }
 
+void Model::initializeMeshBuffers() {
+  for (std::size_t i = 0; i < meshCount_; i++)
+    meshes_[i]->initBuffers(); // private; Model is a friend of Mesh
+}
+
 Model::Model(Memory::PoolManager &poolManager, StackAllocater *stack,
-             std::string_view filepath, std::uint32_t id)
+             std::string_view filepath, std::uint32_t id,
+             bool deferBufferInit)
     : id_(id), poolManager_(poolManager), stack_(stack) {
   // Capture the stack position before any allocations so Load(true) can
   // roll back the whole load-time scratch in one call.
@@ -148,7 +154,8 @@ Model::Model(Memory::PoolManager &poolManager, StackAllocater *stack,
     MeshT *slot = poolManager_.acquireFromPool<MeshT>();
     if (!slot)
       throw Util::PapoException(TAG, "Mesh pool exhausted while loading model");
-    meshes_[i] = new (slot) MeshT(verts, vertexCount, inds, indexCount);
+    meshes_[i] =
+        new (slot) MeshT(verts, vertexCount, inds, indexCount, deferBufferInit);
   }
 
   for (std::size_t i = 0; i < materialCount_; i++) {
