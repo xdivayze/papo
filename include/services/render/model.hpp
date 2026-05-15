@@ -36,9 +36,6 @@ public:
   static constexpr std::size_t INLINE_MATERIAL_CAP = 16;
   static constexpr std::size_t INLINE_INSTANCE_CAP = 64;
 
-  // load all meshes to the GPU. Release meshes to the pool if clean cpu data.
-  std::uint32_t Load(bool cleanCPUData);
-
   // Stack holds only transient vertex/index buffers; Load(true) reclaims
   // the entire stack via stack_->freeToMarker(transientMarker_). The
   // pointer arrays + instance array live inline in Model (or on heap if
@@ -55,6 +52,10 @@ public:
   std::uint32_t id() const { return id_; }
 
 private:
+  // load all meshes to the GPU. Reclaims the transient stack scratch when
+  // cleanCPUData is set. Driven by AssetManager (friend), not callers.
+  std::uint32_t Load(bool cleanCPUData);
+
   template <typename T>
   static T *stackAlloc(StackAllocater *stack, std::size_t count);
 
