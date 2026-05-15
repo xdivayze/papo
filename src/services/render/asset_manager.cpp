@@ -19,6 +19,7 @@ constexpr std::uint32_t MODEL_SCRATCH_STACK_BYTES = 8u << 20; // 8 MiB
 // on a clean GPU upload) so the StackAllocater pool is sized by `nstacks`,
 // but Models/Meshes/Materials live as long as the cached model, so they
 // need a capacity independent of the concurrency bound. Tunable.
+//TODO this number of cached models is too small for any practical application. 
 constexpr std::size_t MAX_MODELS = 256;
 } // namespace
 
