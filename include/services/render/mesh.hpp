@@ -107,6 +107,7 @@ public:
   static constexpr const char *TAG = "Mesh Manager";
 
   friend class AssetManager;
+  friend class Model;
 
   // mesh object to be copied to the GPU memory bound by the passed vertex and
   // element objects
@@ -183,5 +184,12 @@ Service::Mesh<TVertex>::Mesh(TVertex *vertices, unsigned int vertexCount,
 }
 
 template <VertexTypes::VertexLayout TVertex> Service::Mesh<TVertex>::~Mesh() {
-  // TODO
+  // Release the GL objects this mesh owns. glDelete* are no-ops on name 0
+  // and silently ignore already-deleted names, so this is safe even if the
+  // mesh was never uploaded. vertices_/indices_ are NOT freed here: they
+  // point into the model's transient StackAllocater scratch, which is owned
+  // and reclaimed by Model/StackAllocater, not by Mesh.
+  glDeleteVertexArrays(1, &VAO_);
+  glDeleteBuffers(1, &VBO_);
+  glDeleteBuffers(1, &EBO_);
 }

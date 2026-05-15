@@ -35,9 +35,14 @@ private:
   void *modelData_;
   std::size_t modelDataStackSize_;
 
+  std::uint32_t idCounter_ = 0;
+
   Memory::PoolManager &poolManager_;
   MemoryManager &memoryManager_;
 
-  robin_hood::unordered_flat_map<std::string, ModelHandle<Model>> cache_;
+  robin_hood::unordered_flat_map<std::uint32_t, StackAllocater *>
+      allocatorLeaseMap; // stack allocator lease map
+  robin_hood::unordered_flat_map<std::string, ModelHandle<Model>>
+      cache_; // asset cache
 };
 } // namespace Service

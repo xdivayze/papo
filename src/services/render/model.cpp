@@ -7,6 +7,7 @@
 #include "services/memory/stack_allocater.hpp"
 #include "utils/exception.hpp"
 #include <algorithm>
+#include <cstdint>
 #include <new>
 
 namespace {
@@ -48,6 +49,29 @@ void buildInstances(const aiNode *node, const aiMatrix4x4 &parentTransform,
 
 namespace Service {
 
+std::uint32_t Model::Load(bool cleanCPUData) {
+  if (!stack_)
+    throw Util::PapoException(
+        TAG, "Model::Load: no stack bound; CPU mesh data unavailable "
+             "for GPU upload");
+
+  if (!loaded_) {
+    for (std::size_t i = 0; i < meshCount_; i++)
+      meshes_[i]->Load(); // glBufferData + SetupAttribs
+    loaded_ = true;
+
+    if (cleanCPUData) {
+      // Mesh data now lives on the GPU; reclaim ALL transient vertex/
+      // index scratch in one shot. The now-dangling vertices_/indices_
+      // in each Mesh are never re-read (loaded_ guards re-entry).
+      stack_->freeToMarker(transientMarker_);
+      stack_ = nullptr;
+    }
+  }
+
+  return id_;
+}
+
 template <typename T>
 T *Model::stackAlloc(StackAllocater *stack, std::size_t count) {
   if (count == 0)
@@ -57,8 +81,12 @@ T *Model::stackAlloc(StackAllocater *stack, std::size_t count) {
 }
 
 Model::Model(Memory::PoolManager &poolManager, StackAllocater *stack,
-             std::string_view filepath)
-    : poolManager_(poolManager), stack_(stack) {
+             std::string_view filepath, std::uint32_t id)
+    : id_(id), poolManager_(poolManager), stack_(stack) {
+  // Capture the stack position before any allocations so Load(true) can
+  // roll back the whole load-time scratch in one call.
+  transientMarker_ = stack_ ? stack_->getMarker() : 0;
+
   Assimp::Importer import;
   const aiScene *scene = import.ReadFile(
       filepath.data(), aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -72,16 +100,15 @@ Model::Model(Memory::PoolManager &poolManager, StackAllocater *stack,
   materialCount_ = scene->mNumMaterials;
   instanceCount_ = countInstances(scene->mRootNode);
 
-  // Persistent block: pointer arrays + inline instance array. These live
-  // for the lifetime of the model.
-  meshes_ = stackAlloc<MeshT *>(stack_, meshCount_);
-  materials_ = stackAlloc<Material *>(stack_, materialCount_);
-  instances_ = stackAlloc<MeshInstance>(stack_, instanceCount_);
-
-  // Everything allocated after this marker is transient: per-mesh vertex
-  // and index buffers needed only until GPU upload. Load(cleanCPUData=true)
-  // can stack_->freeToMarker(transientMarker_) to reclaim them.
-  transientMarker_ = stack_->getMarker();
+  // Inline-first; heap fallback when a count exceeds its cap.
+  meshes_ =
+      (meshCount_ <= INLINE_MESH_CAP) ? meshesInline_ : new MeshT *[meshCount_];
+  materials_ = (materialCount_ <= INLINE_MATERIAL_CAP)
+                   ? materialsInline_
+                   : new Material *[materialCount_];
+  instances_ = (instanceCount_ <= INLINE_INSTANCE_CAP)
+                   ? instancesInline_
+                   : new MeshInstance[instanceCount_];
 
   for (std::size_t i = 0; i < meshCount_; i++) {
     const aiMesh *aim = scene->mMeshes[i];
@@ -100,11 +127,10 @@ Model::Model(Memory::PoolManager &poolManager, StackAllocater *stack,
     for (unsigned int v = 0; v < vertexCount; v++) {
       verts[v].position = {aim->mVertices[v].x, aim->mVertices[v].y,
                            aim->mVertices[v].z};
-      verts[v].normal =
-          hasNormals
-              ? glm::vec3{aim->mNormals[v].x, aim->mNormals[v].y,
-                          aim->mNormals[v].z}
-              : glm::vec3{0.0f};
+      verts[v].normal = hasNormals
+                            ? glm::vec3{aim->mNormals[v].x, aim->mNormals[v].y,
+                                        aim->mNormals[v].z}
+                            : glm::vec3{0.0f};
       verts[v].diffuseMapCoords =
           uv0 ? glm::vec2{uv0[v].x, uv0[v].y} : glm::vec2{0.0f};
       verts[v].specularMapCoords =
@@ -154,8 +180,6 @@ Model::Model(Memory::PoolManager &poolManager, StackAllocater *stack,
   aiMatrix4x4 identity;
   buildInstances(scene->mRootNode, identity, scene, instances_, instanceCursor);
 
-  // Sort instances by (materialIndex, meshIndex) so the render loop sees
-  // material binds coalesced and mesh-pointer chases run in order.
   std::sort(instances_, instances_ + instanceCount_,
             [](const MeshInstance &a, const MeshInstance &b) {
               if (a.materialIndex != b.materialIndex)
@@ -175,8 +199,16 @@ Model::~Model() {
     materials_[i]->~Material();
     poolManager_.releaseToPool(materials_[i]);
   }
-  // MeshInstance is trivially destructible. The stack itself is owned by
-  // the caller (AssetManager) — it clears/reclaims after destruction.
+
+  // Heap-fallback storage — release if we spilled past the inline cap.
+  if (meshes_ != meshesInline_)
+    delete[] meshes_;
+  if (materials_ != materialsInline_)
+    delete[] materials_;
+  if (instances_ != instancesInline_)
+    delete[] instances_;
+
+  // Stack is owned by AssetManager; not touched here.
 }
 
 } // namespace Service

@@ -30,48 +30,55 @@ class Model {
 public:
   friend class AssetManager;
 
-  static constexpr const char* TAG = "ASSET MANAGER";
+  static constexpr const char *TAG = "MODEL CLASS";
+
+  static constexpr std::size_t INLINE_MESH_CAP = 32;
+  static constexpr std::size_t INLINE_MATERIAL_CAP = 16;
+  static constexpr std::size_t INLINE_INSTANCE_CAP = 64;
 
   // load all meshes to the GPU. Release meshes to the pool if clean cpu data.
-  void Load(bool cleanCPUData);
+  std::uint32_t Load(bool cleanCPUData);
 
-  Model(Memory::PoolManager &poolManager,
-        Mesh<VertexTypes::Vertex1P1N1UV> **meshes, std::size_t meshCount,
-        Material **materials, std::size_t materialCount,
-        MeshInstance *instances, std::size_t instanceCount,
-        bool loaded = false); // fully instantiated model
-
-  // Caller (AssetManager) is responsible for handing in a stack with enough
-  // capacity and for reclaiming/clearing it after the Model is destroyed.
-  // The Model only allocates from it — it never frees on the stack.
+  // Stack holds only transient vertex/index buffers; Load(true) reclaims
+  // the entire stack via stack_->freeToMarker(transientMarker_). The
+  // pointer arrays + instance array live inline in Model (or on heap if
+  // their counts exceed the inline caps), so the Model object survives
+  // independently of the stack.
   Model(Memory::PoolManager &poolManager, StackAllocater *stack,
-        std::string_view filepath);
+        std::string_view filepath, std::uint32_t id);
 
   ~Model();
 
-  // Marker to where vertex/index data starts on the stack. Load(true) can
-  // freeToMarker(this) on the stack to discard CPU-side mesh data after
-  // upload, while keeping the pointer arrays + instances live.
   std::uint32_t transientMarker() const { return transientMarker_; }
   StackAllocater *stack() const { return stack_; }
+
+  std::uint32_t id() const { return id_; }
 
 private:
   template <typename T>
   static T *stackAlloc(StackAllocater *stack, std::size_t count);
 
+  std::uint32_t id_;
+
   Memory::PoolManager &poolManager_;
   StackAllocater *stack_ = nullptr;
   std::uint32_t transientMarker_ = 0;
 
-  Mesh<VertexTypes::Vertex1P1N1UV> **meshes_;
-  std::size_t meshCount_;
+  // Inline storage for the common case. If counts exceed caps, the
+  // corresponding active pointer points to a heap allocation instead.
+  Mesh<VertexTypes::Vertex1P1N1UV> *meshesInline_[INLINE_MESH_CAP];
+  Material *materialsInline_[INLINE_MATERIAL_CAP];
+  MeshInstance instancesInline_[INLINE_INSTANCE_CAP];
 
-  Material **materials_;
-  std::size_t materialCount_;
+  Mesh<VertexTypes::Vertex1P1N1UV> **meshes_ = nullptr;
+  std::size_t meshCount_ = 0;
 
-  MeshInstance *instances_;
-  std::size_t instanceCount_;
+  Material **materials_ = nullptr;
+  std::size_t materialCount_ = 0;
 
-  bool loaded_;
+  MeshInstance *instances_ = nullptr;
+  std::size_t instanceCount_ = 0;
+
+  bool loaded_ = false;
 };
 } // namespace Service
