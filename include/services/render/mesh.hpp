@@ -8,6 +8,8 @@
 #include "utils/exception.hpp"
 #include <cstddef>
 
+class MeshTest;
+
 namespace VertexTypes {
 
 template <typename T>
@@ -108,6 +110,7 @@ public:
 
   friend class AssetManager;
   friend class Model;
+  friend class ::MeshTest;
 
   // mesh object to be copied to the GPU memory bound by the passed vertex and
   // element objects

@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <string_view>
 
+class ModelTest;
+
 namespace Service {
 
 class StackAllocater;
@@ -29,6 +31,7 @@ class AssetManager;
 class Model {
 public:
   friend class AssetManager;
+  friend class ::ModelTest;
 
   static constexpr const char *TAG = "MODEL CLASS";
 

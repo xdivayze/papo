@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstddef>
 class StackAllocaterTest;
+class ModelTest;
 namespace Service
 {
     class MemoryManager;
@@ -12,6 +13,7 @@ namespace Service
         friend class MemoryManager;
         friend class Model;
         friend class ::StackAllocaterTest;
+        friend class ::ModelTest;
 
         typedef std::uint32_t Marker;
         

@@ -10,6 +10,7 @@ add_library(services
     time_manager.cpp
     render/mesh.cpp
     render/model.cpp
+    render/asset_manager.cpp
     )
 
 target_include_directories(services PUBLIC
