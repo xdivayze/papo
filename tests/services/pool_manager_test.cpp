@@ -1,7 +1,11 @@
 #include <gtest/gtest.h>
 #include "services/memory/pool_manager.hpp"
 #include "utils/exception.hpp"
+#include <atomic>
+#include <mutex>
+#include <thread>
 #include <unordered_set>
+#include <vector>
 
 struct Widget
 {
@@ -238,4 +242,112 @@ TEST_F(PoolManagerTest, ReregisterAfterRemoveSucceeds)
     manager_.removePoolAllocater<int>();
     ASSERT_NO_THROW(manager_.registerPool<int>(8));
     EXPECT_TRUE(manager_.hasPool<int>());
+}
+
+// --- concurrency (synchronized PoolManager) ---
+
+// Many threads hammer acquire/release on the SAME pool. Invariants:
+//  - a chunk handed out is never simultaneously owned by two threads
+//  - the free-list survives intact: exactly CAP distinct chunks remain
+TEST_F(PoolManagerTest, ConcurrentSamePoolAcquireRelease)
+{
+    constexpr size_t CAP = 64;
+    constexpr int THREADS = 8;
+    constexpr int ITERS = 4000;
+    manager_.registerPool<Widget>(CAP);
+
+    std::mutex liveMutex;
+    std::unordered_set<Widget *> live; // chunks currently held by some thread
+    std::atomic<bool> doubleHandout{false};
+
+    auto worker = [&]
+    {
+        for (int i = 0; i < ITERS; ++i)
+        {
+            Widget *p = manager_.acquireFromPool<Widget>();
+            if (!p)
+                continue; // pool momentarily exhausted by peers — fine
+            {
+                std::lock_guard<std::mutex> lg(liveMutex);
+                if (!live.insert(p).second)
+                    doubleHandout = true; // same chunk given to two threads
+            }
+            p->x = i; // touch the memory
+            {
+                std::lock_guard<std::mutex> lg(liveMutex);
+                live.erase(p);
+            }
+            manager_.releaseToPool(p);
+        }
+    };
+
+    std::vector<std::thread> ts;
+    for (int t = 0; t < THREADS; ++t)
+        ts.emplace_back(worker);
+    for (auto &t : ts)
+        t.join();
+
+    EXPECT_FALSE(doubleHandout.load());
+    EXPECT_TRUE(live.empty());
+
+    // Free-list integrity: all CAP chunks are re-acquirable and distinct.
+    std::unordered_set<Widget *> drained;
+    for (size_t i = 0; i < CAP; ++i)
+    {
+        Widget *p = manager_.acquireFromPool<Widget>();
+        ASSERT_NE(p, nullptr) << "lost a chunk at index " << i;
+        EXPECT_TRUE(drained.insert(p).second) << "duplicate chunk at " << i;
+    }
+    EXPECT_EQ(manager_.acquireFromPool<Widget>(), nullptr); // exactly CAP
+}
+
+// Distinct-type pools used in parallel must not corrupt one another
+// (per-pool mutex => cross-type parallelism with no shared state).
+TEST_F(PoolManagerTest, ConcurrentDistinctPoolsAreIndependent)
+{
+    constexpr size_t CAP = 32;
+    constexpr int ITERS = 4000;
+    manager_.registerPool<int>(CAP);
+    manager_.registerPool<Widget>(CAP);
+
+    std::atomic<bool> failure{false};
+
+    auto hammer = [&](auto tag)
+    {
+        using T = typename decltype(tag)::type;
+        for (int i = 0; i < ITERS; ++i)
+        {
+            T *p = manager_.acquireFromPool<T>();
+            if (!p)
+                continue;
+            manager_.releaseToPool(p);
+        }
+    };
+    struct IntTag { using type = int; };
+    struct WidgetTag { using type = Widget; };
+
+    std::vector<std::thread> ts;
+    for (int t = 0; t < 4; ++t)
+        ts.emplace_back([&] { hammer(IntTag{}); });
+    for (int t = 0; t < 4; ++t)
+        ts.emplace_back([&] { hammer(WidgetTag{}); });
+    for (auto &t : ts)
+        t.join();
+
+    EXPECT_FALSE(failure.load());
+    // Both pools fully recovered.
+    std::unordered_set<int *> ints;
+    for (size_t i = 0; i < CAP; ++i)
+    {
+        int *p = manager_.acquireFromPool<int>();
+        ASSERT_NE(p, nullptr);
+        EXPECT_TRUE(ints.insert(p).second);
+    }
+    std::unordered_set<Widget *> widgets;
+    for (size_t i = 0; i < CAP; ++i)
+    {
+        Widget *p = manager_.acquireFromPool<Widget>();
+        ASSERT_NE(p, nullptr);
+        EXPECT_TRUE(widgets.insert(p).second);
+    }
 }

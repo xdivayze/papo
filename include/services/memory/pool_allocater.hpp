@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <malloc.h>
 #include <algorithm>
+#include <mutex>
 #include "../../utils/memory_utils.hpp"
 
 class PoolAllocaterTest;
@@ -39,6 +40,11 @@ namespace Memory
         size_t poolCapacity_;
         void *rawBlock_;
 
+        // Serializes the intrusive free-list mutation so concurrent
+        // acquire/release of THIS pool (e.g. parallel model loads) is safe.
+        // Per-pool: distinct types never contend on each other.
+        std::mutex allocMutex_;
+
         PoolAllocater(size_t capacity) : poolCapacity_(capacity)
         {
             rawBlock_ = malloc(capacity * chunkSize_ + alignof(T) - 1);
@@ -62,6 +68,7 @@ namespace Memory
 
         void *alloc() override
         {
+            std::lock_guard<std::mutex> lg(allocMutex_);
             if (freeHead_ == nullptr)
                 return nullptr;
             FreeNode *chunk = freeHead_;
@@ -71,6 +78,7 @@ namespace Memory
 
         void free(void *ptr) override
         {
+            std::lock_guard<std::mutex> lg(allocMutex_);
             FreeNode *chunk = static_cast<FreeNode *>(ptr);
             chunk->next = freeHead_;
             freeHead_ = chunk;
