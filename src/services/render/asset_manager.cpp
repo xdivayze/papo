@@ -13,6 +13,7 @@ using MeshT = Service::Mesh<VertexTypes::Vertex1P1N1UV>;
 
 // Byte size of each leased per-model scratch stack. Holds one model's
 // transient vertex/index buffers until Load(true) reclaims them. Tunable.
+// Any model larger than this will be heap allocated (slower)
 constexpr std::uint32_t MODEL_SCRATCH_STACK_BYTES = 8u << 20; // 8 MiB
 
 // Capacity for the long-lived object pools. Stacks are transient (returned

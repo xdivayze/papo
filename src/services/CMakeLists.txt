@@ -11,6 +11,7 @@ add_library(services
     render/mesh.cpp
     render/model.cpp
     render/asset_manager.cpp
+    render/render.cpp
     )
 
 target_include_directories(services PUBLIC
