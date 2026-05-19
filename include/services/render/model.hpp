@@ -84,6 +84,7 @@ private:
   Material *materialsInline_[INLINE_MATERIAL_CAP];
   MeshInstance instancesInline_[INLINE_INSTANCE_CAP];
 
+  //heap fallbacks
   Mesh<VertexTypes::Vertex1P1N1UV> **meshes_ = nullptr;
   std::size_t meshCount_ = 0;
 

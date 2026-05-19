@@ -12,6 +12,7 @@ add_library(services
     render/model.cpp
     render/asset_manager.cpp
     render/render.cpp
+    render/renderable_object.cpp
     )
 
 target_include_directories(services PUBLIC
