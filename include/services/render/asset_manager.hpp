@@ -20,6 +20,12 @@ class ThreadPoolManager;
 
 namespace Service {
 
+// TODO switch to shared pointers for model lifetime
+
+/*
+! MODELS ARE NOT DESTROYED UNLESS EXPLICITLY DONE BY THE SCENE WHICH WOULD
+! CAUSE CONFLICTS WITH THE CACHE SYSTEM
+*/
 class AssetManager {
 public:
   static constexpr const char *TAG = "Asset Manager";
@@ -48,7 +54,8 @@ public:
   modelFromFilePathAsync(async::ThreadPoolManager &pool,
                          std::string_view filepath);
 
-  AssetManager(Memory::PoolManager& poolManager, MemoryManager& memoryManager_, size_t nstacks);
+  AssetManager(Memory::PoolManager &poolManager, MemoryManager &memoryManager_,
+               size_t nstacks);
   ~AssetManager();
 
 private:

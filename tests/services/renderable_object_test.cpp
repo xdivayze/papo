@@ -7,7 +7,8 @@
 
 namespace
 {
-    using Service::RenderableObject;
+    using Runtime::AbstractMoveableObject;
+    using Runtime::RenderableObject;
     using Handle = Service::AssetManager::ModelHandle<Service::Model>;
 
     constexpr float kEps = 1e-4f;
@@ -18,6 +19,14 @@ namespace
 
     void expectVecNear(const glm::vec3 &a, const glm::vec3 &b)
     {
+        EXPECT_NEAR(a.x, b.x, kEps);
+        EXPECT_NEAR(a.y, b.y, kEps);
+        EXPECT_NEAR(a.z, b.z, kEps);
+    }
+
+    void expectQuatNear(const glm::quat &a, const glm::quat &b)
+    {
+        EXPECT_NEAR(a.w, b.w, kEps);
         EXPECT_NEAR(a.x, b.x, kEps);
         EXPECT_NEAR(a.y, b.y, kEps);
         EXPECT_NEAR(a.z, b.z, kEps);
@@ -38,9 +47,62 @@ namespace
         glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
         return T * R * S;
     }
+
+    // Minimal concrete subclass so we can test the base class on its own.
+    class MoveableProbe : public AbstractMoveableObject {};
 } // namespace
 
-// --- construction ---
+// === AbstractMoveableObject =================================================
+
+TEST(AbstractMoveableObjectTest, SetCoordinatesStoresValue)
+{
+    MoveableProbe obj;
+    glm::vec3 pos(1.0f, -2.0f, 3.0f);
+    obj.setCoordinates(pos);
+    expectVecNear(obj.coordinates(), pos);
+}
+
+TEST(AbstractMoveableObjectTest, SetRotationEulerSyncsQuat)
+{
+    MoveableProbe obj;
+    glm::vec3 eul(0.2f, 0.5f, -0.1f);
+    obj.setRotation(eul);
+    expectVecNear(obj.rotation(), eul);
+    expectQuatNear(obj.rotationQuat(), glm::quat(eul));
+}
+
+TEST(AbstractMoveableObjectTest, SetRotationQuatDerivesEuler)
+{
+    MoveableProbe obj;
+    glm::quat q = glm::angleAxis(glm::radians(45.0f), glm::vec3(0, 1, 0));
+    obj.setRotation(q);
+    expectQuatNear(obj.rotationQuat(), q);
+    expectVecNear(obj.rotation(), glm::eulerAngles(q));
+}
+
+TEST(AbstractMoveableObjectTest, SetScalingStoresValue)
+{
+    MoveableProbe obj;
+    glm::vec3 scl(2.0f, 0.5f, 3.0f);
+    obj.setScaling(scl);
+    expectVecNear(obj.scaling(), scl);
+}
+
+TEST(AbstractMoveableObjectTest, RotateLocalComposesAndNormalises)
+{
+    MoveableProbe obj;
+    glm::quat start = glm::angleAxis(glm::radians(30.0f), glm::vec3(0, 1, 0));
+    obj.setRotation(start);
+
+    glm::vec3 deltaEul(0.0f, glm::radians(60.0f), 0.0f);
+    obj.rotateLocal(deltaEul);
+
+    glm::quat expected = glm::normalize(start * glm::quat(deltaEul));
+    expectQuatNear(obj.rotationQuat(), expected);
+    EXPECT_NEAR(glm::length(obj.rotationQuat()), 1.0f, kEps);
+}
+
+// === RenderableObject =======================================================
 
 TEST(RenderableObjectTest, EulerCtorStoresStateAndSyncsQuat)
 {
@@ -53,12 +115,8 @@ TEST(RenderableObjectTest, EulerCtorStoresStateAndSyncsQuat)
     expectVecNear(obj.coordinates(), pos);
     expectVecNear(obj.rotation(), eul);
     expectVecNear(obj.scaling(), scl);
-    // Euler ctor must derive a matching quaternion.
     glm::quat expected(eul);
-    EXPECT_NEAR(obj.rotationQuat().w, expected.w, kEps);
-    EXPECT_NEAR(obj.rotationQuat().x, expected.x, kEps);
-    EXPECT_NEAR(obj.rotationQuat().y, expected.y, kEps);
-    EXPECT_NEAR(obj.rotationQuat().z, expected.z, kEps);
+    expectQuatNear(obj.rotationQuat(), expected);
     expectMatNear(obj.getTransform(), expectedTransform(pos, expected, scl));
 }
 
@@ -72,7 +130,24 @@ TEST(RenderableObjectTest, QuatCtorStoresStateAndDerivesEuler)
 
     expectVecNear(obj.coordinates(), pos);
     expectVecNear(obj.rotation(), glm::eulerAngles(rot));
+    expectQuatNear(obj.rotationQuat(), rot);
     expectVecNear(obj.scaling(), scl);
+    expectMatNear(obj.getTransform(), expectedTransform(pos, rot, scl));
+}
+
+// The 5-arg ctor takes both Euler and quat; current behavior treats the quat
+// as authoritative (transform built from the quat, Euler is derived from it).
+TEST(RenderableObjectTest, EulerAndQuatCtorTreatsQuatAsAuthoritative)
+{
+    glm::vec3 pos(0.0f, 0.0f, 0.0f);
+    glm::vec3 ignoredEul(0.0f, 0.0f, 0.0f);
+    glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1, 0, 0));
+    glm::vec3 scl(1.0f, 1.0f, 1.0f);
+
+    RenderableObject obj(nullHandle(), pos, ignoredEul, rot, scl);
+
+    expectQuatNear(obj.rotationQuat(), rot);
+    expectVecNear(obj.rotation(), glm::eulerAngles(rot));
     expectMatNear(obj.getTransform(), expectedTransform(pos, rot, scl));
 }
 
@@ -83,7 +158,16 @@ TEST(RenderableObjectTest, IdentityStateYieldsIdentityTransform)
     expectMatNear(obj.getTransform(), glm::mat4(1.0f));
 }
 
-// --- setters re-derive the transform ---
+TEST(RenderableObjectTest, HandleOnlyCtorDefaultsToIdentity)
+{
+    RenderableObject obj(nullHandle());
+
+    expectVecNear(obj.coordinates(), glm::vec3(0.0f));
+    expectVecNear(obj.rotation(), glm::vec3(0.0f));
+    expectQuatNear(obj.rotationQuat(), glm::quat(glm::vec3(0.0f)));
+    expectVecNear(obj.scaling(), glm::vec3(1.0f));
+    expectMatNear(obj.getTransform(), glm::mat4(1.0f));
+}
 
 TEST(RenderableObjectTest, SetCoordinatesUpdatesTransform)
 {
@@ -106,7 +190,7 @@ TEST(RenderableObjectTest, SetRotationEulerSyncsQuatAndTransform)
 
     expectVecNear(obj.rotation(), eul);
     glm::quat q(eul);
-    EXPECT_NEAR(obj.rotationQuat().w, q.w, kEps);
+    expectQuatNear(obj.rotationQuat(), q);
     expectMatNear(obj.getTransform(),
                   expectedTransform(glm::vec3(0.0f), q, glm::vec3(1.0f)));
 }
@@ -119,6 +203,7 @@ TEST(RenderableObjectTest, SetRotationQuatDerivesEulerAndTransform)
     obj.setRotation(q);
 
     expectVecNear(obj.rotation(), glm::eulerAngles(q));
+    expectQuatNear(obj.rotationQuat(), q);
     expectMatNear(obj.getTransform(),
                   expectedTransform(glm::vec3(0.0f), q, glm::vec3(1.0f)));
 }
@@ -135,8 +220,6 @@ TEST(RenderableObjectTest, SetScalingUpdatesTransform)
                   expectedTransform(glm::vec3(0.0f), glm::quat(glm::vec3(0.0f)), scl));
 }
 
-// --- transform composition order is T * R * S ---
-
 TEST(RenderableObjectTest, TransformAppliesScaleThenRotateThenTranslate)
 {
     glm::vec3 pos(10.0f, 0.0f, 0.0f);
@@ -150,11 +233,11 @@ TEST(RenderableObjectTest, TransformAppliesScaleThenRotateThenTranslate)
     expectVecNear(glm::vec3(p), glm::vec3(10.0f, 2.0f, 0.0f));
 }
 
-// --- virtual destructor: deleting through a base pointer is well-defined ---
-
-TEST(RenderableObjectTest, DestructibleThroughBasePointer)
+// Tests polymorphic destruction through the base pointer (now safe because
+// AbstractMoveableObject has a virtual destructor).
+TEST(RenderableObjectTest, DestructibleThroughAbstractBase)
 {
-    RenderableObject *obj =
+    AbstractMoveableObject *obj =
         new RenderableObject(nullHandle(), glm::vec3(0.0f), glm::vec3(0.0f),
                              glm::vec3(1.0f));
     EXPECT_NO_FATAL_FAILURE(delete obj);
