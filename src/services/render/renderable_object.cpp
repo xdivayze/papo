@@ -1,21 +1,35 @@
 #include "services/render/renderable_object.hpp"
 
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/geometric.hpp"
 #include "glm/gtc/quaternion.hpp"
+#include "services/services.hpp"
+#include "services/time_manager.hpp"
 
 namespace Runtime {
 
 // --- AbstractMoveableObject -------------------------------------------------
 
+AbstractMoveableObject::AbstractMoveableObject() {
+  auto &bus = Engine::Root::get().getEventManager().getEventBus();
+  bus.subscribe(Service::TimeManager::LastFrameTimeUpdatedEventID, *this);
+}
+
+AbstractMoveableObject::~AbstractMoveableObject() {
+  auto &bus = Engine::Root::get().getEventManager().getEventBus();
+  bus.unsubscribe(Service::TimeManager::LastFrameTimeUpdatedEventID, *this);
+}
+
 glm::vec3 AbstractMoveableObject::coordinates() const { return coordinates_; }
 glm::vec3 AbstractMoveableObject::rotation() const { return rotationRad_; }
 glm::quat AbstractMoveableObject::rotationQuat() const { return rotationQuat_; }
 glm::vec3 AbstractMoveableObject::scaling() const { return scaling_; }
+float AbstractMoveableObject::deltaTime() const { return deltaTime_; }
 
-void AbstractMoveableObject::rotateLocal(glm::vec3 rotationEuler) {
-  glm::quat delta(rotationEuler);
-  rotationQuat_ = glm::normalize(rotationQuat_ * delta);
-  setRotation(rotationQuat_);
+void AbstractMoveableObject::setDeltaTime(float dt) { deltaTime_ = dt; }
+
+void AbstractMoveableObject::eventCall(void * /*payload*/) {
+  deltaTime_ = Engine::Root::get().getTimeManager().getLastFramePeriodSeconds();
 }
 
 void AbstractMoveableObject::setCoordinates(glm::vec3 coordinates) {
@@ -36,14 +50,50 @@ void AbstractMoveableObject::setScaling(glm::vec3 scaling) {
   scaling_ = scaling;
 }
 
-// TODO implement and test — empty stub so the vtable links.
-void AbstractMoveableObject::step(glm::vec3 /*speed*/) {}
+void AbstractMoveableObject::step(glm::vec3 speed) {
+  setCoordinates(coordinates() + speed * deltaTime_);
+}
+
+void AbstractMoveableObject::rotateLocal(glm::vec3 rotationEuler) {
+  glm::quat delta(rotationEuler);
+  setRotation(glm::normalize(rotationQuat() * delta));
+}
+
+void AbstractMoveableObject::rotateWorld(glm::vec3 rotationEuler) {
+  glm::quat delta(rotationEuler);
+  setRotation(glm::normalize(delta * rotationQuat()));
+}
+
+void AbstractMoveableObject::rotateStepWorld(glm::vec3 axis,
+                                             float angularSpeed) {
+  glm::quat delta =
+      glm::angleAxis(angularSpeed * deltaTime_, glm::normalize(axis));
+  setRotation(glm::normalize(delta * rotationQuat()));
+}
+
+void AbstractMoveableObject::rotateAroundPivot(glm::vec3 pivot,
+                                               glm::vec3 rotationEuler) {
+  glm::quat delta(rotationEuler);
+  setCoordinates(pivot + delta * (coordinates() - pivot));
+  setRotation(glm::normalize(delta * rotationQuat()));
+}
+
+void AbstractMoveableObject::rotateStepAroundPivot(glm::vec3 pivot,
+                                                   glm::vec3 axis,
+                                                   float angularSpeed) {
+  glm::quat delta =
+      glm::angleAxis(angularSpeed * deltaTime_, glm::normalize(axis));
+  setCoordinates(pivot + delta * (coordinates() - pivot));
+  setRotation(glm::normalize(delta * rotationQuat()));
+}
 
 // --- RenderableObject -------------------------------------------------------
 
 // Base members are private with no init-list-friendly base ctor, so we seed
 // them through the base setters. updateTransform() is called once at the end
 // instead of letting the overridden setters fire it on every call.
+// The default-constructed AbstractMoveableObject base subscribes to the
+// LastFrameTimeUpdated event on the global bus.
 RenderableObject::RenderableObject(
     Service::AssetManager::ModelHandle<Service::Model> modelHandle,
     glm::vec3 coordinates, glm::vec3 rotationRad, glm::vec3 scaling)

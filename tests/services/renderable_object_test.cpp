@@ -4,6 +4,9 @@
 
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
+#include "services/event/papo_event.hpp"
+#include "services/services.hpp"
+#include "services/time_manager.hpp"
 
 namespace
 {
@@ -16,6 +19,18 @@ namespace
     // RenderableObject only stores the handle (never dereferences it), so an
     // empty handle is sufficient and no Model / GL context is required.
     Handle nullHandle() { return Handle{UINT32_MAX, nullptr}; }
+
+    // Build a LastFrameTimeUpdated event on the stack and publish it through
+    // the global bus. The event carries no payload (matches TimeManager).
+    void publishLastFrameTimeUpdated()
+    {
+        auto &bus = Engine::Root::get().getEventManager().getEventBus();
+        PapoEvent::PapoEventHeader hdr{
+            Service::TimeManager::LastFrameTimeUpdatedEventID,
+            sizeof(PapoEvent::PapoEventHeader), 0};
+        PapoEvent::PapoEventGeneric evt{&hdr, nullptr};
+        bus.publish(&evt);
+    }
 
     void expectVecNear(const glm::vec3 &a, const glm::vec3 &b)
     {
@@ -51,6 +66,18 @@ namespace
     // Minimal concrete subclass so we can test the base class on its own.
     class MoveableProbe : public AbstractMoveableObject {};
 } // namespace
+
+// Friend of Service::TimeManager (see `friend class ::TimeManagerTest;` in
+// time_manager.hpp). Drives the otherwise-private lastFramePeriod_ so we can
+// verify the bus subscription pulls fresh values out of TimeManager.
+class TimeManagerTest
+{
+public:
+    static void setLastFramePeriodSeconds(Service::TimeManager &tm, float seconds)
+    {
+        tm.lastFramePeriod_ = Service::TimeManager::SecondsToCycles(seconds);
+    }
+};
 
 // === AbstractMoveableObject =================================================
 
@@ -100,6 +127,169 @@ TEST(AbstractMoveableObjectTest, RotateLocalComposesAndNormalises)
     glm::quat expected = glm::normalize(start * glm::quat(deltaEul));
     expectQuatNear(obj.rotationQuat(), expected);
     EXPECT_NEAR(glm::length(obj.rotationQuat()), 1.0f, kEps);
+}
+
+TEST(AbstractMoveableObjectTest, RotateWorldPreMultiplies)
+{
+    MoveableProbe obj;
+    glm::quat start = glm::angleAxis(glm::radians(30.0f), glm::vec3(0, 1, 0));
+    obj.setRotation(start);
+
+    glm::vec3 deltaEul(0.0f, glm::radians(60.0f), 0.0f);
+    obj.rotateWorld(deltaEul);
+
+    glm::quat expected = glm::normalize(glm::quat(deltaEul) * start);
+    expectQuatNear(obj.rotationQuat(), expected);
+}
+
+TEST(AbstractMoveableObjectTest, SetAndGetDeltaTime)
+{
+    MoveableProbe obj;
+    EXPECT_NEAR(obj.deltaTime(), 0.0f, kEps);
+    obj.setDeltaTime(0.016f);
+    EXPECT_NEAR(obj.deltaTime(), 0.016f, kEps);
+}
+
+TEST(AbstractMoveableObjectTest, StepTranslatesBySpeedTimesDt)
+{
+    MoveableProbe obj;
+    obj.setCoordinates(glm::vec3(1.0f, 2.0f, 3.0f));
+    obj.setDeltaTime(0.5f);
+
+    obj.step(glm::vec3(2.0f, 0.0f, -4.0f));
+
+    expectVecNear(obj.coordinates(), glm::vec3(2.0f, 2.0f, 1.0f));
+}
+
+TEST(AbstractMoveableObjectTest, StepWithZeroDtIsNoOp)
+{
+    MoveableProbe obj;
+    obj.setCoordinates(glm::vec3(5.0f, 5.0f, 5.0f));
+    // deltaTime defaults to 0
+    obj.step(glm::vec3(100.0f, 100.0f, 100.0f));
+    expectVecNear(obj.coordinates(), glm::vec3(5.0f, 5.0f, 5.0f));
+}
+
+TEST(AbstractMoveableObjectTest, RotateStepWorldAdvancesByAngularSpeedTimesDt)
+{
+    MoveableProbe obj;
+    obj.setDeltaTime(0.25f);
+
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    float angularSpeed = glm::radians(360.0f); // 1 turn / sec
+    obj.rotateStepWorld(axis, angularSpeed);
+
+    // 0.25s * 360 deg/s = 90 deg around world Y.
+    glm::quat expected = glm::normalize(
+        glm::angleAxis(angularSpeed * 0.25f, axis) * glm::quat(glm::vec3(0.0f)));
+    expectQuatNear(obj.rotationQuat(), expected);
+    // No orbit: coordinates unchanged.
+    expectVecNear(obj.coordinates(), glm::vec3(0.0f));
+}
+
+TEST(AbstractMoveableObjectTest, RotateAroundPivotOrbitsAndRotates)
+{
+    MoveableProbe obj;
+    obj.setCoordinates(glm::vec3(1.0f, 0.0f, 0.0f));
+
+    // 90deg around world Y, pivoting at origin: (1,0,0) -> (0,0,-1).
+    glm::vec3 pivot(0.0f);
+    glm::vec3 eul(0.0f, glm::radians(90.0f), 0.0f);
+    obj.rotateAroundPivot(pivot, eul);
+
+    expectVecNear(obj.coordinates(), glm::vec3(0.0f, 0.0f, -1.0f));
+    glm::quat expectedRot = glm::normalize(glm::quat(eul));
+    expectQuatNear(obj.rotationQuat(), expectedRot);
+}
+
+TEST(AbstractMoveableObjectTest, RotateAroundPivotOffOriginOrbitsAroundPivot)
+{
+    MoveableProbe obj;
+    obj.setCoordinates(glm::vec3(3.0f, 0.0f, 0.0f));
+
+    // 180deg around Y pivoting at (1,0,0): (3,0,0) -> (-1,0,0).
+    glm::vec3 pivot(1.0f, 0.0f, 0.0f);
+    glm::vec3 eul(0.0f, glm::radians(180.0f), 0.0f);
+    obj.rotateAroundPivot(pivot, eul);
+
+    expectVecNear(obj.coordinates(), glm::vec3(-1.0f, 0.0f, 0.0f));
+}
+
+TEST(AbstractMoveableObjectTest, RotateStepAroundPivotUsesDeltaTime)
+{
+    MoveableProbe obj;
+    obj.setCoordinates(glm::vec3(1.0f, 0.0f, 0.0f));
+    obj.setDeltaTime(0.5f);
+
+    glm::vec3 pivot(0.0f);
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    float angularSpeed = glm::radians(180.0f); // half-turn / sec
+    // 0.5s * 180 = 90deg around Y at origin: (1,0,0) -> (0,0,-1).
+    obj.rotateStepAroundPivot(pivot, axis, angularSpeed);
+
+    expectVecNear(obj.coordinates(), glm::vec3(0.0f, 0.0f, -1.0f));
+    glm::quat expectedRot =
+        glm::normalize(glm::angleAxis(angularSpeed * 0.5f, axis));
+    expectQuatNear(obj.rotationQuat(), expectedRot);
+}
+
+// === Event-bus subscription ================================================
+
+TEST(AbstractMoveableObjectTest, CtorSubscribesAndPullsDtFromTimeManager)
+{
+    auto &tm = Engine::Root::get().getTimeManager();
+    TimeManagerTest::setLastFramePeriodSeconds(tm, 0.016f);
+
+    MoveableProbe obj;
+    EXPECT_NEAR(obj.deltaTime(), 0.0f, kEps); // default until first event fires
+    publishLastFrameTimeUpdated();
+    EXPECT_NEAR(obj.deltaTime(), 0.016f, kEps);
+
+    TimeManagerTest::setLastFramePeriodSeconds(tm, 0.033f);
+    publishLastFrameTimeUpdated();
+    EXPECT_NEAR(obj.deltaTime(), 0.033f, kEps);
+}
+
+TEST(AbstractMoveableObjectTest, DestructionUnsubscribesQuietly)
+{
+    auto &tm = Engine::Root::get().getTimeManager();
+    TimeManagerTest::setLastFramePeriodSeconds(tm, 0.1f);
+    {
+        MoveableProbe obj;
+        publishLastFrameTimeUpdated();
+        ASSERT_NEAR(obj.deltaTime(), 0.1f, kEps);
+    }
+    // The dtor must have unsubscribed: publishing now reaches no live listener.
+    EXPECT_NO_FATAL_FAILURE(publishLastFrameTimeUpdated());
+}
+
+TEST(RenderableObjectTest, SubscribesAndStepConsumesDtFromTimeManager)
+{
+    auto &tm = Engine::Root::get().getTimeManager();
+    TimeManagerTest::setLastFramePeriodSeconds(tm, 0.025f);
+
+    RenderableObject obj(nullHandle(), glm::vec3(0.0f), glm::vec3(0.0f),
+                         glm::vec3(1.0f));
+    publishLastFrameTimeUpdated();
+    EXPECT_NEAR(obj.deltaTime(), 0.025f, kEps);
+
+    obj.step(glm::vec3(2.0f, 0.0f, 0.0f));
+    expectVecNear(obj.coordinates(), glm::vec3(0.05f, 0.0f, 0.0f));
+}
+
+// Verify the derived RenderableObject's transform refreshes when the inherited
+// step() runs (it routes through the virtual setCoordinates override).
+TEST(RenderableObjectTest, StepUpdatesTransformThroughOverride)
+{
+    RenderableObject obj(nullHandle(), glm::vec3(0.0f), glm::vec3(0.0f),
+                         glm::vec3(1.0f));
+    obj.setDeltaTime(2.0f);
+    obj.step(glm::vec3(1.0f, 0.0f, 0.0f));
+
+    expectVecNear(obj.coordinates(), glm::vec3(2.0f, 0.0f, 0.0f));
+    expectMatNear(obj.getTransform(),
+                  expectedTransform(glm::vec3(2.0f, 0.0f, 0.0f),
+                                    glm::quat(glm::vec3(0.0f)), glm::vec3(1.0f)));
 }
 
 // === RenderableObject =======================================================

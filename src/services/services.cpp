@@ -13,4 +13,13 @@ namespace Engine
         delete logger_;
         delete memoryManager_;
     }
+
+    Service::TimeManager &Root::getTimeManager()
+    {
+        // Function-local static: thread-safe lazy init, destroyed before
+        // Root (reverse order of dynamic initialization) so the dtor's
+        // eventManager_ access is still valid.
+        static Service::TimeManager instance;
+        return instance;
+    }
 }
