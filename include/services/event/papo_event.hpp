@@ -28,6 +28,16 @@ namespace PapoEvent
     class IPapoEventListener
     {
     public:
+        IPapoEventListener() = default;
+        virtual ~IPapoEventListener() = default;
+
+        // The bus stores listeners by reference; copying or moving a
+        // listener would silently invalidate the bus's stored reference.
+        IPapoEventListener(const IPapoEventListener &) = delete;
+        IPapoEventListener &operator=(const IPapoEventListener &) = delete;
+        IPapoEventListener(IPapoEventListener &&) = delete;
+        IPapoEventListener &operator=(IPapoEventListener &&) = delete;
+
         virtual void eventCall(void *payload) = 0;
     };
 

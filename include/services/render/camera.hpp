@@ -2,8 +2,9 @@
 
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/quaternion_float.hpp"
+#include "services/render/renderable_object.hpp"
 namespace Runtime {
-class Camera {
+class Camera : public AbstractMoveableObject {
 public:
   constexpr void setCameraPosition(glm::vec3 cameraPos) {
     cameraPosition_ = cameraPos;

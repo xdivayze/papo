@@ -16,16 +16,9 @@ public:
   // Engine::Root::get().getTimeManager() and stores it as deltaTime().
   AbstractMoveableObject();
 
-  // Note: IPapoEventListener lacks a virtual destructor, so this can't be
-  // marked `override`. Still virtual so RenderableObject's override works.
-  virtual ~AbstractMoveableObject();
+  ~AbstractMoveableObject() override;
 
-  // The event bus stores a reference to `*this` while subscribed; copying or
-  // moving would silently break that reference.
-  AbstractMoveableObject(const AbstractMoveableObject &) = delete;
-  AbstractMoveableObject &operator=(const AbstractMoveableObject &) = delete;
-  AbstractMoveableObject(AbstractMoveableObject &&) = delete;
-  AbstractMoveableObject &operator=(AbstractMoveableObject &&) = delete;
+  // Copy/move are deleted on IPapoEventListener — inherited here.
 
   virtual glm::vec3 coordinates() const;
   virtual glm::vec3 rotation() const;
