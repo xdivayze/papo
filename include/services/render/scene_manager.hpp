@@ -1,3 +1,4 @@
+#include "services/render/camera.hpp"
 #include "services/render/renderable_object.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -11,11 +12,19 @@ public:
 
 class Scene {
 public:
-  virtual void renderScene();
+  virtual void renderScene() const;
+  virtual ICamera &camera() const { return camera_; }
+
+  virtual void frameStartCallback();
+
+  Scene(ICamera &camera);
+  ~Scene() = default;
 
 private:
   virtual void addObject(RenderableObject &&model);
   virtual void removeObject(uint32_t modelId);
+
+  ICamera &camera_;
 };
 
 // TODO add physics engine
@@ -31,19 +40,39 @@ public:
     LayerDescriptor hotTransientDescriptor;
     LayerDescriptor warmTransientDescriptor;
     LayerDescriptor RAMLoadedDescriptor;
+
+    enum DescriptorNames { STABLE, HOT, WARM, RAM, COLD };
+
+    inline constexpr DescriptorNames
+    distanceMatcher(std::size_t distance) const noexcept {
+      if (distance <= stableDescriptor.layerEndDistance)
+        return DescriptorNames::STABLE;
+      if (distance <= hotTransientDescriptor.layerEndDistance)
+        return DescriptorNames::HOT;
+      if (distance <= warmTransientDescriptor.layerEndDistance)
+        return DescriptorNames::WARM;
+      if (distance <= RAMLoadedDescriptor.layerEndDistance)
+        return DescriptorNames::RAM;
+      return DescriptorNames::COLD;
+    }
   };
 
-  void renderScene() override;
+  void renderScene() const override;
+
+  void frameStartCallback() override;
 
   // add or remove model from the appropriate vector/asset file depending on the
   // coordinates
   void addObject(RenderableObject &&model) override;
   void removeObject(uint32_t modelId) override;
 
-  StreamingScene(LayerDescriptorList &&layerDescriptorList);
-  ~StreamingScene();
+  StreamingScene(LayerDescriptorList &&layerDescriptorList, ICamera &camera);
+  ~StreamingScene() = default;
 
 private:
+  std::vector<RenderableObject> *
+  distanceToRenderVector(std::size_t distance) noexcept;
+
   LayerDescriptorList layerDescriptorList_;
 
   // O(1) swap and pop or O(1) push_back

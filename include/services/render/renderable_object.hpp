@@ -82,6 +82,7 @@ private:
   float deltaTime_ = 0.0f;
 };
 
+//TODO do transform updates lazily, only update rotation coords etc and not the transform
 class RenderableObject : public AbstractMoveableObject {
 public:
   RenderableObject(
