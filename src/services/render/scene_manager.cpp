@@ -43,7 +43,7 @@ void StreamingScene::addObject(RenderableObject &&model) {
   std::vector<RenderableObject> *v = distanceToRenderVector(distance);
   if (v == nullptr) { // TODO scene graph file usage
   } else {
-    v->push_back(); //TODO figure out what to do with the event listener problem. (maybe a class whose only purpose is to be called in event bus)
+    // v->push_back(); //TODO figure out what to do with the event listener problem. (maybe a class whose only purpose is to be called in event bus)
   }
 }
 
