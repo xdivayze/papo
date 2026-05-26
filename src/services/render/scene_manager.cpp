@@ -2,6 +2,8 @@
 #include "glm/geometric.hpp"
 #include "services/render/camera.hpp"
 #include "services/render/renderable_object.hpp"
+#include <cstdint>
+#include <vector>
 
 namespace Runtime {
 Scene::Scene(ICamera &camera) : camera_(camera) {}
@@ -19,9 +21,10 @@ void StreamingScene::renderScene() const {
   }
 }
 
-std::vector<RenderableObject> *
-StreamingScene::distanceToRenderVector(std::size_t distance) noexcept {
-  switch (layerDescriptorList_.distanceMatcher(distance)) {
+std::vector<RenderableObject> *StreamingScene::descriptorNameToRenderVector(
+    StreamingScene::LayerDescriptorList::DescriptorNames layer) noexcept {
+  using LayerDescriptorList = StreamingScene::LayerDescriptorList;
+  switch (layer) {
   case LayerDescriptorList::STABLE:
     return &stableRendered_;
   case LayerDescriptorList::HOT:
@@ -35,16 +38,57 @@ StreamingScene::distanceToRenderVector(std::size_t distance) noexcept {
   }
 }
 
+std::vector<RenderableObject> *
+StreamingScene::distanceToRenderVector(std::size_t distance) noexcept {
+  return descriptorNameToRenderVector(
+      layerDescriptorList_.distanceMatcher(distance));
+}
+
 void StreamingScene::addObject(RenderableObject &&model) {
   glm::vec3 coords = camera().coordinates();
   glm::vec3 modelCoords = model.coordinates();
 
   float distance = glm::distance(coords, modelCoords);
   std::vector<RenderableObject> *v = distanceToRenderVector(distance);
-  if (v == nullptr) { // TODO scene graph file usage
-  } else {
-    // v->push_back(); //TODO figure out what to do with the event listener problem. (maybe a class whose only purpose is to be called in event bus)
+  if (v != nullptr) {
+    v->push_back(std::move(model));
+    return;
   }
+
+  // TODO scene graph file push obj usage
+}
+
+void StreamingScene::removeObject(uint32_t objectId,
+                                  LayerDescriptorList::DescriptorNames layer) {
+  if (auto vec = distanceToRenderVector(layer); vec != nullptr) {
+    for (int i = 0; i < vec->size(); i++) {
+      auto &elem = vec->at(i);
+      if (elem.id() == objectId) {
+        vec->at(i) = std::move(vec->back());
+        vec->pop_back();
+      }
+    }
+    return;
+  }
+  // TODO filesystem scene graph work
+}
+
+void StreamingScene::removeObject(uint32_t objectId) {
+  std::vector<std::vector<RenderableObject> *> vecs(
+      {&stableRendered_, &transientRendered_, &transientLoaded_, &ramLoaded_});
+
+  for (auto vec : vecs) {
+    for (int i = 0; i < vec->size(); i++) {
+      auto &elem = vec->at(i);
+      if (elem.id() == objectId) {
+        vec->at(i) = std::move(vec->back());
+        vec->pop_back();
+        return;
+      }
+    }
+  }
+
+  // TODO filesystem scene graph work
 }
 
 } // namespace Runtime

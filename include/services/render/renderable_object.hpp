@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 #include "glm/ext/matrix_float4x4.hpp"
@@ -96,6 +97,7 @@ public:
   // (orbit) and orientation (world-frame rotation).
   virtual void rotateStepAroundPivot(glm::vec3 pivot, glm::vec3 axis,
                                      float angularSpeed);
+  virtual uint32_t id();
 
 private:
   std::unique_ptr<TimeListener> timeListener_;
@@ -111,7 +113,8 @@ private:
   glm::vec3 scaling_{1.0f};
 };
 
-//TODO do transform updates lazily, only update rotation coords etc and not the transform
+// TODO do transform updates lazily, only update rotation coords etc and not the
+// transform
 class RenderableObject : public AbstractMoveableObject {
 public:
   RenderableObject(

@@ -64,14 +64,23 @@ public:
   // add or remove model from the appropriate vector/asset file depending on the
   // coordinates
   void addObject(RenderableObject &&model) override;
-  void removeObject(uint32_t modelId) override;
 
-  StreamingScene(LayerDescriptorList &&layerDescriptorList, ICamera &camera);
+  void removeObject(uint32_t objectId) override;
+  void removeObject(uint32_t objectId,
+                    LayerDescriptorList::DescriptorNames layer);
+
+  // TODO add async rmeove object to search in all layers simultaneously
+  // (requires mutexes)
+
+  explicit StreamingScene(LayerDescriptorList &&layerDescriptorList, ICamera &camera);
   ~StreamingScene() = default;
 
 private:
   std::vector<RenderableObject> *
   distanceToRenderVector(std::size_t distance) noexcept;
+
+  std::vector<RenderableObject> *descriptorNameToRenderVector(
+      LayerDescriptorList::DescriptorNames layer) noexcept;
 
   LayerDescriptorList layerDescriptorList_;
 
