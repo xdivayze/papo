@@ -4,6 +4,7 @@
 #include "glad/gl.h"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float3.hpp"
+#include "services/render/asset_manager.hpp"
 #include <cstdint>
 #include <string_view>
 #include <vector>
@@ -87,11 +88,12 @@ public:
   //-
   //
 
-  explicit ShaderManager(std::string_view vertexShaderPath,
-                         std::string_view fragmentShaderPath);
+  explicit ShaderManager(std::string_view vertexShaderName,
+                         std::string_view fragmentShaderName,
+                         Service::AssetManager &assetManager);
 
-  explicit ShaderManager( std::string &&vertexShader,
-                          std::string &&fragmentShader);
+  explicit ShaderManager(std::string &&vertexShader,
+                         std::string &&fragmentShader);
   ~ShaderManager() = default;
 
 private:
@@ -99,7 +101,7 @@ private:
   unsigned int createProgram(FeatureMask features) const;
 
   void compileAndLinkShader(unsigned int shader, const std::string &shaderBody,
-                           const std::vector<std::string_view>& defines) const;
+                            const std::vector<std::string_view> &defines) const;
 
   robin_hood::unordered_map<FeatureMask, unsigned int> programCache_;
 

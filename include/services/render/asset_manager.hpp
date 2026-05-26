@@ -59,6 +59,8 @@ public:
   modelFromFilePathAsync(async::ThreadPoolManager &pool,
                          std::string_view filepath);
 
+  std::string loadShader(std::string_view shaderName); //TODO
+
   AssetManager(Memory::PoolManager &poolManager, MemoryManager &memoryManager_,
                size_t nstacks);
   ~AssetManager();

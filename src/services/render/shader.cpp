@@ -120,13 +120,11 @@ ShaderManager::ShaderManager(std::string &&vertexShader,
 }
 
 ShaderManager::ShaderManager(std::string_view vertexShaderPath,
-                             std::string_view fragmentShaderPath) {
-
-  // TODO ctor with the filesystem read
-  
-  
-
-}
+                             std::string_view fragmentShaderPath,
+                             Service::AssetManager &assetManager)
+    : Services::ShaderManager(
+          std::move(assetManager.loadShader(vertexShaderPath)),
+          std::move(assetManager.loadShader(fragmentShaderPath))) {}
 
 static int checkIfProgramSuccessful(unsigned int program) {
   int success;
