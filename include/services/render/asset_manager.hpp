@@ -26,6 +26,11 @@ namespace Service {
 ! MODELS ARE NOT DESTROYED UNLESS EXPLICITLY DONE BY THE SCENE WHICH WOULD
 ! CAUSE CONFLICTS WITH THE CACHE SYSTEM
 */
+
+//TODO split the asset manager to its run time and compile time (for the game ) components
+// 7.2 in the book
+
+//TODO add VFS
 class AssetManager {
 public:
   static constexpr const char *TAG = "Asset Manager";

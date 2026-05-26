@@ -119,7 +119,14 @@ ShaderManager::ShaderManager(std::string &&vertexShader,
   currentProgramID_ = getProgram(Features::NORMAL_MAP);
 }
 
-// TODO ctor with the filesystem read
+ShaderManager::ShaderManager(std::string_view vertexShaderPath,
+                             std::string_view fragmentShaderPath) {
+
+  // TODO ctor with the filesystem read
+  
+  
+
+}
 
 static int checkIfProgramSuccessful(unsigned int program) {
   int success;
