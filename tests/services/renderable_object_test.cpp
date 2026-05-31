@@ -64,7 +64,10 @@ namespace
     }
 
     // Minimal concrete subclass so we can test the base class on its own.
-    class MoveableProbe : public AbstractMoveableObject {};
+    class MoveableProbe : public AbstractMoveableObject {
+    public:
+        uint32_t id() const override { return 0; }
+    };
 } // namespace
 
 // Friend of Service::TimeManager (see `friend class ::TimeManagerTest;` in

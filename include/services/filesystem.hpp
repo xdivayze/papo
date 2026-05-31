@@ -19,8 +19,8 @@ public:
     auto candidate_can = std::filesystem::weakly_canonical(candidate);
     auto root_it = root_can.begin();
     auto cand_it = candidate_can.begin();
-    for (; root_it != root.end(); ++root_it, ++cand_it) {
-      if (cand_it == candidate.end() || *cand_it != *root_it)
+    for (; root_it != root_can.end(); ++root_it, ++cand_it) {
+      if (cand_it == candidate_can.end() || *cand_it != *root_it)
         return false;
     }
     return true;
@@ -39,7 +39,7 @@ public:
 
   void write(const std::filesystem::path &virtualFilepath,
              const std::byte *data, size_t len);
-  void write(const std::filesystem::path &virtualFilepath, std::streambuf *buf);
+  void write(const std::filesystem::path &virtualFilepath, std::istream &buf);
 
   /*
    returns the virtual path if the absPath is already in VFS. Otherwise,
@@ -50,8 +50,8 @@ public:
   std::filesystem::path
   exposeToVFS(const std::filesystem::path &absPath,
               const std::filesystem::path &virtualFilepath);
-  std::filesystem::path copyToVFS(const std::filesystem::path &absPath,
-                                  const std::filesystem::path &virtualFilepath);
+  void copyToVFS(const std::filesystem::path &absPath,
+                 const std::filesystem::path &virtualFilepath);
 
   /*
     resolve VFS path to absolute filepath, optionally
@@ -70,10 +70,18 @@ public:
                                     bool enforceAllowed = true) const;
 
   // push back
-  void addAllowedPath(const std::filesystem::path path);
+  inline void addAllowedPath(const std::filesystem::path path) {
+    allowedPaths_.push_back(path);
+  }
 
   // pop and swap
-  void removeAllowedPath(const std::filesystem::path &path);
+  inline void removeAllowedPath(const std::filesystem::path &path) {
+    for (int i = 0; i < allowedPaths_.size(); i++)
+      if (allowedPaths_[i] == path) {
+        allowedPaths_[i] = allowedPaths_.back();
+        allowedPaths_.pop_back();
+      }
+  }
 
   inline void popAllowedPath() { allowedPaths_.pop_back(); }
 
@@ -88,8 +96,12 @@ public:
     return false;
   }
 
-  VFS(std::vector<std::filesystem::path> allowedPaths,
-      bool allowDangerous = false);
+  VFS(std::vector<std::filesystem::path> &&allowedPaths,
+      bool allowDangerous = false, std::filesystem::path root = "./.vfs");
+
+  VFS(bool allowDangerous = false);
+
+  ~VFS();
 
 private:
   bool allowDangerous_ = false;

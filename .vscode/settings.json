@@ -1,8 +1,25 @@
 {
   "clangd.arguments": [
-    "--compile-commands-dir=${workspaceFolder}/build",
+    "--compile-commands-dir=${workspaceFolder}",
     "--background-index",
-    "--clang-tidy"
+    "--background-index-priority=low",
+    "--pch-storage=memory",
+    "--header-insertion=never",
+    "--completion-style=detailed",
+    "--limit-results=20",
+    "--malloc-trim",
+    "-j=4"
   ],
-  "C_Cpp.intelliSenseEngine": "disabled"
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "editor.inlayHints.enabled": "off",
+  "files.watcherExclude": {
+    "**/build/**": true,
+    "**/external/**": true,
+    "**/.cache/**": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/external": true,
+    "**/.cache": true
+  }
 }

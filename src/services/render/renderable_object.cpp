@@ -106,8 +106,9 @@ void AbstractMoveableObject::rotateStepAroundPivot(glm::vec3 pivot,
 // (via unique_ptr) which subscribes to LastFrameTimeUpdated on the global bus.
 RenderableObject::RenderableObject(
     Service::AssetManager::ModelHandle<Service::Model> modelHandle,
-    glm::vec3 coordinates, glm::vec3 rotationRad, glm::vec3 scaling)
-    : modelHandle_(modelHandle) {
+    glm::vec3 coordinates, glm::vec3 rotationRad, glm::vec3 scaling,
+    uint32_t id)
+    : modelHandle_(modelHandle), id_(id) {
   AbstractMoveableObject::setCoordinates(coordinates);
   AbstractMoveableObject::setRotation(rotationRad);
   AbstractMoveableObject::setScaling(scaling);
@@ -116,8 +117,9 @@ RenderableObject::RenderableObject(
 
 RenderableObject::RenderableObject(
     Service::AssetManager::ModelHandle<Service::Model> modelHandle,
-    glm::vec3 coordinates, glm::quat rotationQuat, glm::vec3 scaling)
-    : modelHandle_(modelHandle) {
+    glm::vec3 coordinates, glm::quat rotationQuat, glm::vec3 scaling,
+    uint32_t id)
+    : modelHandle_(modelHandle), id_(id) {
   AbstractMoveableObject::setCoordinates(coordinates);
   AbstractMoveableObject::setRotation(rotationQuat);
   AbstractMoveableObject::setScaling(scaling);
@@ -131,8 +133,8 @@ RenderableObject::RenderableObject(
 RenderableObject::RenderableObject(
     Service::AssetManager::ModelHandle<Service::Model> modelHandle,
     glm::vec3 coordinates, glm::vec3 /*rotationRad*/, glm::quat rotationQuat,
-    glm::vec3 scaling)
-    : modelHandle_(modelHandle) {
+    glm::vec3 scaling, uint32_t id)
+    : modelHandle_(modelHandle), id_(id) {
   AbstractMoveableObject::setCoordinates(coordinates);
   AbstractMoveableObject::setRotation(rotationQuat);
   AbstractMoveableObject::setScaling(scaling);
@@ -141,9 +143,9 @@ RenderableObject::RenderableObject(
 
 // Defaults to the identity transform: origin, no rotation, unit scale.
 RenderableObject::RenderableObject(
-    Service::AssetManager::ModelHandle<Service::Model> modelHandle)
+    Service::AssetManager::ModelHandle<Service::Model> modelHandle, uint32_t id)
     : RenderableObject(modelHandle, glm::vec3(0.0f), glm::vec3(0.0f),
-                       glm::vec3(1.0f)) {}
+                       glm::vec3(1.0f), id) {}
 
 glm::mat4 RenderableObject::getTransform() const { return transform_; }
 

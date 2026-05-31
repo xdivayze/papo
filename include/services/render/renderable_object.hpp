@@ -97,7 +97,7 @@ public:
   // (orbit) and orientation (world-frame rotation).
   virtual void rotateStepAroundPivot(glm::vec3 pivot, glm::vec3 axis,
                                      float angularSpeed);
-  virtual uint32_t id();
+  virtual uint32_t id() const = 0;
 
 private:
   std::unique_ptr<TimeListener> timeListener_;
@@ -119,18 +119,21 @@ class RenderableObject : public AbstractMoveableObject {
 public:
   RenderableObject(
       Service::AssetManager::ModelHandle<Service::Model> modelHandle,
-      glm::vec3 coordinates, glm::vec3 rotationRad, glm::vec3 scaling);
+      glm::vec3 coordinates, glm::vec3 rotationRad, glm::vec3 scaling,
+      uint32_t id = 0);
   RenderableObject(
       Service::AssetManager::ModelHandle<Service::Model> modelHandle,
-      glm::vec3 coordinates, glm::quat rotationQuat, glm::vec3 scaling);
+      glm::vec3 coordinates, glm::quat rotationQuat, glm::vec3 scaling,
+      uint32_t id = 0);
   RenderableObject(
       Service::AssetManager::ModelHandle<Service::Model> modelHandle,
       glm::vec3 coordinates, glm::vec3 rotationRad, glm::quat rotationQuat,
-      glm::vec3 scaling);
+      glm::vec3 scaling, uint32_t id = 0);
 
   // Defaults to identity transform (origin, no rotation, unit scale).
   explicit RenderableObject(
-      Service::AssetManager::ModelHandle<Service::Model> modelHandle);
+      Service::AssetManager::ModelHandle<Service::Model> modelHandle,
+      uint32_t id = 0);
 
   ~RenderableObject() override = default;
 
@@ -148,12 +151,16 @@ public:
   void setRotation(glm::quat rotationQuat) override;
   void setScaling(glm::vec3 scaling) override;
 
+  virtual constexpr inline uint32_t id() const override  {return id_;}
+
 private:
   void updateTransform();
 
   Service::AssetManager::ModelHandle<Service::Model> modelHandle_;
 
   glm::mat4 transform_;
+
+  uint32_t id_;
 };
 
 } // namespace Runtime

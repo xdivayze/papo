@@ -66,9 +66,9 @@ void VFS::write(const fs::path &virtualFilepath, const std::byte *data,
   auto stream = getWriteHandle(virtualFilepath);
   stream.write(reinterpret_cast<const char *>(data), len);
 }
-void VFS::write(const fs::path &virtualFilepath, std::streambuf *buf) {
+void VFS::write(const fs::path &virtualFilepath, std::istream &buf) {
   auto stream = getWriteHandle(virtualFilepath);
-  stream << buf;
+  stream << buf.rdbuf();
 }
 
 /*
@@ -96,15 +96,20 @@ fs::path VFS::exposeToVFS(const std::filesystem::path &absPath,
   return virtualFilepath;
 }
 
-std::filesystem::path copyToVFS(const std::filesystem::path &absPath,
-                                const std::filesystem::path &virtualFilepath) {
-                                  
-                                }
+void VFS::copyToVFS(const std::filesystem::path &absPath,
+                    const std::filesystem::path &virtualFilepath) {
+  if (!allowDangerous_ && !checkIfPathIsAllowed(absPath))
+    throw Util::PapoException(TAG,
+                              "copyToVFS::source directory is not allowed");
+
+  auto str = std::ifstream(absPath);
+  write(virtualFilepath, str);
+}
 
 fs::path VFS::translateFS(const fs::path &filepath, bool enforceAllowed) const {
   fs::path abs = fs::weakly_canonical(filepath);
 
-  if ((enforceAllowed && allowDangerous_) && !checkIfPathIsAllowed(abs))
+  if ((enforceAllowed && !allowDangerous_) && !checkIfPathIsAllowed(abs))
     throw Util::PapoException(TAG, "translateFS::illegal filepath");
 
   if (!checkIfSubdir(root_, abs))
@@ -120,9 +125,10 @@ fs::path VFS::translateVFS(const fs::path &virtualFilepath,
     throw Util::PapoException(
         TAG, "translateVFS::virtual file path must be relative");
 
-  fs::path candidate = fs::weakly_canonical(root_ / virtualFilepath);
+  fs::path candidate = (root_ / virtualFilepath).lexically_normal();
 
-  if (!checkIfSubdir(root_, candidate))
+  fs::path rel = candidate.lexically_relative(root_);
+  if (rel.empty() || *rel.begin() == "..")
     throw Util::PapoException(TAG,
                               "translateVFS::virtual filepath outside VFS");
 
@@ -131,4 +137,16 @@ fs::path VFS::translateVFS(const fs::path &virtualFilepath,
 
   return std::move(candidate);
 }
+
+VFS::VFS(std::vector<std::filesystem::path> &&allowedPaths, bool allowDangerous,
+         fs::path root)
+    : allowDangerous_(allowDangerous), allowedPaths_(std::move(allowedPaths)) {
+  if (!fs::exists(root))
+    fs::create_directory(root);
+
+  root_ = fs::canonical(root);
+}
+
+VFS::VFS(bool allowDangerous) : VFS({}, allowDangerous) {}
+VFS::~VFS() { fs::remove_all(root_); }
 } // namespace Service

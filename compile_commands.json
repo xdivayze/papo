@@ -1,1 +1,200 @@
-build/compile_commands.json
+[
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/logger.cpp.o -c /home/cavej/repos/papo/src/services/logger.cpp",
+    "file": "/home/cavej/repos/papo/src/services/logger.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/logger.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/services.cpp.o -c /home/cavej/repos/papo/src/services/services.cpp",
+    "file": "/home/cavej/repos/papo/src/services/services.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/services.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/memory/stack_allocater.cpp.o -c /home/cavej/repos/papo/src/services/memory/stack_allocater.cpp",
+    "file": "/home/cavej/repos/papo/src/services/memory/stack_allocater.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/memory/stack_allocater.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/memory/memory_manager.cpp.o -c /home/cavej/repos/papo/src/services/memory/memory_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/memory/memory_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/memory/memory_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/string_manager.cpp.o -c /home/cavej/repos/papo/src/services/string_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/string_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/string_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/async/thread_pool_manager.cpp.o -c /home/cavej/repos/papo/src/services/async/thread_pool_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/async/thread_pool_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/async/thread_pool_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/memory/arena_allocator.cpp.o -c /home/cavej/repos/papo/src/services/memory/arena_allocator.cpp",
+    "file": "/home/cavej/repos/papo/src/services/memory/arena_allocator.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/memory/arena_allocator.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/event/papo_event_manager.cpp.o -c /home/cavej/repos/papo/src/services/event/papo_event_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/event/papo_event_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/event/papo_event_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/time_manager.cpp.o -c /home/cavej/repos/papo/src/services/time_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/time_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/time_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/mesh.cpp.o -c /home/cavej/repos/papo/src/services/render/mesh.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/mesh.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/mesh.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/model.cpp.o -c /home/cavej/repos/papo/src/services/render/model.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/model.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/model.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/asset_manager.cpp.o -c /home/cavej/repos/papo/src/services/render/asset_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/asset_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/asset_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/render.cpp.o -c /home/cavej/repos/papo/src/services/render/render.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/render.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/render.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/renderable_object.cpp.o -c /home/cavej/repos/papo/src/services/render/renderable_object.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/renderable_object.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/renderable_object.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/scene_manager.cpp.o -c /home/cavej/repos/papo/src/services/render/scene_manager.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/scene_manager.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/scene_manager.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/render/shader.cpp.o -c /home/cavej/repos/papo/src/services/render/shader.cpp",
+    "file": "/home/cavej/repos/papo/src/services/render/shader.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/render/shader.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -g -std=gnu++20 -o src/services/CMakeFiles/services.dir/filesystem.cpp.o -c /home/cavej/repos/papo/src/services/filesystem.cpp",
+    "file": "/home/cavej/repos/papo/src/services/filesystem.cpp",
+    "output": "/home/cavej/repos/papo/build/src/services/CMakeFiles/services.dir/filesystem.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -g -std=gnu++20 -o src/utils/CMakeFiles/utils.dir/exception_handler.cpp.o -c /home/cavej/repos/papo/src/utils/exception_handler.cpp",
+    "file": "/home/cavej/repos/papo/src/utils/exception_handler.cpp",
+    "output": "/home/cavej/repos/papo/build/src/utils/CMakeFiles/utils.dir/exception_handler.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/logger_test.cpp.o -c /home/cavej/repos/papo/tests/services/logger_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/logger_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/logger_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/stack_allocater_test.cpp.o -c /home/cavej/repos/papo/tests/services/stack_allocater_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/stack_allocater_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/stack_allocater_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/memory_manager_test.cpp.o -c /home/cavej/repos/papo/tests/services/memory_manager_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/memory_manager_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/memory_manager_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/pool_allocater_test.cpp.o -c /home/cavej/repos/papo/tests/services/pool_allocater_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/pool_allocater_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/pool_allocater_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/pool_manager_test.cpp.o -c /home/cavej/repos/papo/tests/services/pool_manager_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/pool_manager_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/pool_manager_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/string_manager_test.cpp.o -c /home/cavej/repos/papo/tests/services/string_manager_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/string_manager_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/string_manager_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/thread_pool_manager_test.cpp.o -c /home/cavej/repos/papo/tests/services/thread_pool_manager_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/thread_pool_manager_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/thread_pool_manager_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/arena_allocator_test.cpp.o -c /home/cavej/repos/papo/tests/services/arena_allocator_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/arena_allocator_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/arena_allocator_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/event_test.cpp.o -c /home/cavej/repos/papo/tests/services/event_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/event_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/event_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/time_manager_test.cpp.o -c /home/cavej/repos/papo/tests/services/time_manager_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/time_manager_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/time_manager_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/mesh_test.cpp.o -c /home/cavej/repos/papo/tests/services/mesh_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/mesh_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/mesh_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/model_test.cpp.o -c /home/cavej/repos/papo/tests/services/model_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/model_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/model_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/asset_manager_test.cpp.o -c /home/cavej/repos/papo/tests/services/asset_manager_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/asset_manager_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/asset_manager_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/services/CMakeFiles/service_tests.dir/renderable_object_test.cpp.o -c /home/cavej/repos/papo/tests/services/renderable_object_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/services/renderable_object_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/services/CMakeFiles/service_tests.dir/renderable_object_test.cpp.o"
+  },
+  {
+    "directory": "/home/cavej/repos/papo/build",
+    "command": "/usr/sbin/clang++ -I/home/cavej/repos/papo/include -I/home/cavej/repos/papo/external/glm -I/home/cavej/repos/papo/external/glfw/include -I/home/cavej/repos/papo/build/gladsources/glad/include -I/home/cavej/repos/papo/external/assimp/code/../include -I/home/cavej/repos/papo/build/external/assimp/code/../include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest/include -isystem /home/cavej/repos/papo/build/_deps/googletest-src/googletest -g -std=gnu++20 -o tests/utils/CMakeFiles/util_tests.dir/exception_test.cpp.o -c /home/cavej/repos/papo/tests/utils/exception_test.cpp",
+    "file": "/home/cavej/repos/papo/tests/utils/exception_test.cpp",
+    "output": "/home/cavej/repos/papo/build/tests/utils/CMakeFiles/util_tests.dir/exception_test.cpp.o"
+  }
+]
