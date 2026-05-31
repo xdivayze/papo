@@ -15,6 +15,7 @@ add_library(services
     render/renderable_object.cpp
     render/scene_manager.cpp
     render/shader.cpp
+    filesystem.cpp
     )
 
 target_include_directories(services PUBLIC
