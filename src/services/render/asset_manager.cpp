@@ -20,17 +20,18 @@ constexpr std::uint32_t MODEL_SCRATCH_STACK_BYTES = 8u << 20; // 8 MiB
 // on a clean GPU upload) so the StackAllocater pool is sized by `nstacks`,
 // but Models/Meshes/Materials live as long as the cached model, so they
 // need a capacity independent of the concurrency bound. Tunable.
-//TODO this number of cached models is too small for any practical application. 
+// TODO this number of cached models is too small for any practical application.
 constexpr std::size_t MAX_MODELS = 256;
 } // namespace
 
 namespace Service {
 
 AssetManager::AssetManager(Memory::PoolManager &poolManager,
-                           MemoryManager &memoryManager, size_t nstacks)
-    : poolManager_(poolManager), memoryManager_(memoryManager) {
-  modelData_ = nullptr;     // unused for now
-  modelDataStackSize_ = 0;  // unused for now
+                           MemoryManager &memoryManager, size_t nstacks,
+                           VFS &vfs)
+    : poolManager_(poolManager), memoryManager_(memoryManager), vfs_(vfs) {
+  modelData_ = nullptr;    // unused for now
+  modelDataStackSize_ = 0; // unused for now
 
   poolManager_.registerPool<Model>(MAX_MODELS);
   poolManager_.registerPool<MeshT>(MAX_MODELS * Model::INLINE_MESH_CAP);
@@ -48,7 +49,6 @@ AssetManager::AssetManager(Memory::PoolManager &poolManager,
     freeStacks_.push_back(new (slot) StackAllocater(MODEL_SCRATCH_STACK_BYTES));
   }
 }
-
 
 AssetManager::ModelHandle<Model>
 AssetManager::modelFromFilePath(std::string_view filepath, bool deferGL) {
@@ -167,6 +167,12 @@ AssetManager::~AssetManager() {
   poolManager_.removePoolAllocater<MeshT>();
   poolManager_.removePoolAllocater<Material>();
   poolManager_.removePoolAllocater<StackAllocater>();
+}
+
+std::string AssetManager::loadShader(std::string_view shaderName) const{
+  auto t = info(AssetType::Shader);
+  return vfs_.readAll(std::string(t.prefix) + std::string(shaderName) +
+                      std::string(t.extension));
 }
 
 } // namespace Service

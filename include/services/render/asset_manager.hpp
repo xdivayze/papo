@@ -2,6 +2,7 @@
 
 #include "collections/robin_hood.hpp"
 #include "model.hpp"
+#include "services/filesystem.hpp"
 #include "services/memory/memory_manager.hpp"
 #include "services/memory/pool_manager.hpp"
 #include "services/memory/stack_allocater.hpp"
@@ -27,13 +28,27 @@ namespace Service {
 ! CAUSE CONFLICTS WITH THE CACHE SYSTEM
 */
 
-//TODO split the asset manager to its run time and compile time (for the game ) components
-// 7.2 in the book
+// TODO split the asset manager to its run time and compile time (for the game )
+// components
+//  7.2 in the book
 
-//TODO add VFS
+// TODO add VFS
 class AssetManager {
 public:
   static constexpr const char *TAG = "Asset Manager";
+
+  enum AssetType : std::uint8_t { Shader, Count };
+  struct AssetTypeInfo {
+    std::string_view prefix;
+    std::string_view extension;
+  };
+
+  static constexpr const std::array<AssetTypeInfo, AssetType::Count> kAssetInfo{
+      {{"shaders/", ".glsl"}}};
+
+  static constexpr inline const AssetTypeInfo &info(AssetType t) {
+    return kAssetInfo[t];
+  }
 
   template <typename T> struct ModelHandle {
     uint32_t id;
@@ -59,10 +74,10 @@ public:
   modelFromFilePathAsync(async::ThreadPoolManager &pool,
                          std::string_view filepath);
 
-  std::string loadShader(std::string_view shaderName); //TODO
+  std::string loadShader(std::string_view shaderName) const ;
 
   AssetManager(Memory::PoolManager &poolManager, MemoryManager &memoryManager_,
-               size_t nstacks);
+               size_t nstacks, VFS &vfs);
   ~AssetManager();
 
 private:
@@ -82,5 +97,7 @@ private:
   std::vector<StackAllocater *> freeStacks_; // available stack leases
   std::mutex leaseMutex_;
   std::condition_variable leaseCv_;
+
+  VFS &vfs_;
 };
 } // namespace Service
