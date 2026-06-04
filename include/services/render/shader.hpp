@@ -14,11 +14,11 @@ class ShaderManager {
 public:
   static constexpr const char *TAG = "Shader Manager";
 
-  enum Features : uint32_t {
+  enum Features : uint8_t {
     NORMAL_MAP = 1 << 0,
   };
 
-  using FeatureMask = uint32_t;
+  using FeatureMask = uint8_t;
 
   inline static constexpr std::pair<Features, std::string_view>
       kFeatureDefines[] = {
